@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Villa Rústica · Panadería para alta cocina</title>
+  <meta name="description" content="Villa Rústica: industria panificadora artesanal que elabora pan de masa madre y bollería a medida para restaurantes de alta cocina.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><ellipse cx='32' cy='36' rx='26' ry='18' fill='%23b5733a'/><path d='M16 30q8-8 16 0M28 26q8-8 16 0' stroke='%23f5ecdf' stroke-width='3' fill='none' stroke-linecap='round'/></svg>">
+</head>
+<body>
+  <header class="site-header" id="top">
+    <nav class="nav container" aria-label="Principal">
+      <a href="#top" class="brand">Villa <em>Rústica</em></a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#panes">Panes</a></li>
+        <li><a href="#proceso">Proceso</a></li>
+        <li><a href="#servicio">Servicio</a></li>
+        <li><a href="#contacto" class="btn btn-small">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <p class="eyebrow">Panificadora artesanal · Solo para restaurantes</p>
+        <h1>El pan que tu cocina <em>merece</em>.</h1>
+        <p class="lead">Elaboramos pan de masa madre y bollería a medida para restaurantes de alta cocina. Fermentaciones largas, harinas seleccionadas y entrega diaria antes del servicio.</p>
+        <div class="hero-actions">
+          <a href="#contacto" class="btn">Solicitar degustación</a>
+          <a href="#panes" class="btn btn-ghost">Ver catálogo</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="nosotros">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Nosotros</p>
+          <h2>Oficio de horno, pensado para la mesa del chef.</h2>
+        </div>
+        <div class="prose">
+          <p>En Villa Rústica creemos que el pan es el primer plato y el último recuerdo de una comida. Por eso trabajamos con pocos clientes y de cerca: cada restaurante recibe piezas pensadas para su menú, su servicio y su forma de cocinar.</p>
+          <p>Nuestro obrador combina técnicas tradicionales con la precisión que exige la alta cocina: control de temperatura y humedad, recetas documentadas y la misma pieza perfecta, día tras día.</p>
+          <ul class="stats">
+            <li><strong>48 h</strong><span>de fermentación lenta</span></li>
+            <li><strong>100%</strong><span>masa madre natural</span></li>
+            <li><strong>0</strong><span>aditivos ni mejorantes</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="panes">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Catálogo</p>
+          <h2>Nuestros panes</h2>
+          <p>Una base de recetas que adaptamos a cada carta. Formato, tamaño y corteza a tu medida.</p>
+        </div>
+        <div class="filters" role="group" aria-label="Filtrar panes">
+          <button class="chip is-active" data-filter="todos">Todos</button>
+          <button class="chip" data-filter="masa-madre">Masa madre</button>
+          <button class="chip" data-filter="servicio">Pan de servicio</button>
+          <button class="chip" data-filter="dulce">Bollería</button>
+        </div>
+        <div class="cards">
+          <article class="card" data-cat="masa-madre">
+            <div class="card-art art-1" aria-hidden="true"></div>
+            <h3>Hogaza de campo</h3>
+            <p>Trigo y centeno molidos a piedra. Corteza gruesa, miga abierta y un ligero punto ácido.</p>
+            <span class="tag">Masa madre</span>
+          </article>
+          <article class="card" data-cat="masa-madre">
+            <div class="card-art art-2" aria-hidden="true"></div>
+            <h3>Centeno integral</h3>
+            <p>Denso y aromático, con semillas tostadas. Ideal para quesos, ahumados y pescados curados.</p>
+            <span class="tag">Masa madre</span>
+          </article>
+          <article class="card" data-cat="servicio">
+            <div class="card-art art-3" aria-hidden="true"></div>
+            <h3>Panecillo individual</h3>
+            <p>Pieza de 40–60 g para el servicio de mesa, terminada en tu horno para llegar caliente.</p>
+            <span class="tag">Pan de servicio</span>
+          </article>
+          <article class="card" data-cat="servicio">
+            <div class="card-art art-4" aria-hidden="true"></div>
+            <h3>Focaccia de aceite</h3>
+            <p>Hidratación alta, aceite de oliva virgen extra y sal en escamas. En bandeja o por porciones.</p>
+            <span class="tag">Pan de servicio</span>
+          </article>
+          <article class="card" data-cat="dulce">
+            <div class="card-art art-5" aria-hidden="true"></div>
+            <h3>Brioche de mantequilla</h3>
+            <p>Miga tierna y dorada para foie, tartar o postres. En molde, trenzado o en piezas pequeñas.</p>
+            <span class="tag">Bollería</span>
+          </article>
+          <article class="card" data-cat="dulce">
+            <div class="card-art art-6" aria-hidden="true"></div>
+            <h3>Croissant de laminado</h3>
+            <p>Mantequilla de calidad y 27 capas. Para desayunos, brunch o petit fours en formato mini.</p>
+            <span class="tag">Bollería</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="proceso">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Proceso</p>
+          <h2>Del molino a tu mesa</h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="step-num">01</span>
+            <h3>Harinas seleccionadas</h3>
+            <p>Trabajamos con molinos de confianza y variedades de trigo y centeno elegidas por su sabor.</p>
+          </li>
+          <li>
+            <span class="step-num">02</span>
+            <h3>Fermentación lenta</h3>
+            <p>Nuestra masa madre trabaja durante horas en frío para desarrollar aroma, textura y digestibilidad.</p>
+          </li>
+          <li>
+            <span class="step-num">03</span>
+            <h3>Horneado de madrugada</h3>
+            <p>Horneamos cada noche en horno de piso para conseguir una corteza crujiente y bien caramelizada.</p>
+          </li>
+          <li>
+            <span class="step-num">04</span>
+            <h3>Entrega antes del servicio</h3>
+            <p>Reparto propio a primera hora, con el pan todavía templado y listo para tu mise en place.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section section-dark" id="servicio">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Para restaurantes</p>
+          <h2>Un obrador que trabaja como parte de tu equipo.</h2>
+          <a href="#contacto" class="btn">Hablemos de tu carta</a>
+        </div>
+        <ul class="features">
+          <li>
+            <h3>Desarrollo de recetas a medida</h3>
+            <p>Creamos contigo panes exclusivos para tu menú degustación: sabores, formas y tamaños propios.</p>
+          </li>
+          <li>
+            <h3>Pedidos flexibles</h3>
+            <p>Ajusta cantidades hasta el día anterior según tus reservas, sin mínimos complicados.</p>
+          </li>
+          <li>
+            <h3>Precocido y congelado</h3>
+            <p>Opciones para terminar en tu horno y servir el pan recién hecho en cada pase.</p>
+          </li>
+          <li>
+            <h3>Atención directa</h3>
+            <p>Un contacto con el obrador para cambios de última hora, eventos y temporadas.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="contacto">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Contacto</p>
+          <h2>Pide una degustación para tu equipo.</h2>
+          <p class="prose">Cuéntanos sobre tu restaurante y te llevaremos una selección de panes para probar en tu cocina.</p>
+          <ul class="contact-list">
+            <li><span>Correo</span><a href="mailto:contacto@villarustica.example">contacto@villarustica.example</a></li>
+            <li><span>Teléfono</span><a href="tel:+000000000">+00 000 000 000</a></li>
+            <li><span>Horario</span>Lunes a sábado · 6:00 – 14:00</li>
+          </ul>
+        </div>
+        <form class="form" id="contact-form" novalidate>
+          <div class="field">
+            <label for="name">Nombre</label>
+            <input id="name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="restaurant">Restaurante</label>
+            <input id="restaurant" name="restaurant" type="text" autocomplete="organization" required>
+          </div>
+          <div class="field">
+            <label for="email">Correo electrónico</label>
+            <input id="email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="message">¿Qué panes te interesan?</label>
+            <textarea id="message" name="message" rows="4"></textarea>
+          </div>
+          <button type="submit" class="btn btn-block">Enviar solicitud</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <a href="#top" class="brand">Villa <em>Rústica</em></a>
+      <p>Industria panificadora para restaurantes de alta cocina.</p>
+      <p class="muted">© <span id="year"></span> Villa Rústica</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

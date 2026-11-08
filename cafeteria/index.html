@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Villa Rústica · Café y panadería artesanal</title>
+  <meta name="description" content="Villa Rústica: café de especialidad con leches vegetales y toppings de la casa (vainilla, lavanda y piloncillo), y panadería artesanal. Arma tu café y pídelo por WhatsApp.">
+  <meta name="theme-color" content="#f8f1e4">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Saltar al contenido</a>
+
+  <header class="site-header" id="top">
+    <nav class="nav wrap" aria-label="Principal">
+      <a href="#top" class="brand" aria-label="Villa Rústica, inicio">
+        <img src="logo.png" alt="" width="40" height="38">
+        <span>Villa Rústica</span>
+      </a>
+      <button class="nav-toggle" aria-expanded="false" aria-controls="menu-nav" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-menu" id="menu-nav">
+        <li><a href="#carta">Carta</a></li>
+        <li><a href="#casa">De la casa</a></li>
+        <li><a href="#panaderia">Panadería</a></li>
+        <li><a href="#historia">Nosotros</a></li>
+        <li><a href="#visitanos">Visítanos</a></li>
+        <li><a href="#pedir" class="btn btn-sm">Pedir ahora</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Café de especialidad · Panadería artesanal</p>
+          <h1>Café con sabor a <em>hogar</em>.</h1>
+          <p class="lead">Arma tu café a tu gusto: elige el grano, la leche y un toque de vainilla, lavanda o piloncillo. Lo preparamos al momento y te avisamos por WhatsApp.</p>
+          <div class="hero-actions">
+            <a href="#pedir" class="btn btn-lg">Armar mi café</a>
+            <a href="#carta" class="btn btn-lg btn-alt">Ver la carta</a>
+          </div>
+          <ul class="hero-points">
+            <li>Leches vegetales</li>
+            <li>Toppings de la casa</li>
+            <li>Pide en 1 minuto</li>
+          </ul>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="hero-badge">
+            <img src="logo.png" alt="" width="320" height="305">
+          </div>
+          <div class="hero-cup c1" data-cup="latte"></div>
+          <div class="hero-cup c2" data-cup="cappuccino"></div>
+          <div class="hero-cup c3" data-cup="flat"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARTA -->
+    <section class="section" id="carta">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">La carta</p>
+          <h2>Cinco clásicos, hechos a tu manera</h2>
+          <p>Los precios son base: la leche y los toppings se suman al armar tu pedido.</p>
+        </div>
+        <div class="menu-grid" id="menu-grid"></div>
+        <p class="note">Espresso y Americano se pueden pedir sin leche. Latte y Americano están disponibles fríos o calientes.</p>
+      </div>
+    </section>
+
+    <!-- DE LA CASA -->
+    <section class="section section-sage" id="casa">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">De la casa</p>
+          <h2>Leches y toppings para personalizar</h2>
+        </div>
+        <div class="two-col">
+          <div>
+            <h3>Tipo de leche</h3>
+            <ul class="price-list" id="milk-list"></ul>
+          </div>
+          <div>
+            <h3>Toppings</h3>
+            <ul class="price-list" id="topping-list"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PEDIR -->
+    <section class="section" id="pedir">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Pedir</p>
+          <h2>Arma tu café</h2>
+          <p>Elige, agrega a tu pedido y envíalo por WhatsApp. Te contestamos para confirmar.</p>
+        </div>
+
+        <div class="order-grid">
+          <div class="builder" aria-label="Armar café">
+            <fieldset>
+              <legend><span class="step">1</span> Elige tu café</legend>
+              <div class="opt-grid" id="opt-coffee" role="radiogroup" aria-label="Café"></div>
+            </fieldset>
+
+            <fieldset id="fs-temp">
+              <legend><span class="step">2</span> Frío o caliente</legend>
+              <div class="chips" id="opt-temp" role="radiogroup" aria-label="Temperatura"></div>
+            </fieldset>
+
+            <fieldset>
+              <legend><span class="step">3</span> Tipo de leche</legend>
+              <div class="chips" id="opt-milk" role="radiogroup" aria-label="Leche"></div>
+            </fieldset>
+
+            <fieldset>
+              <legend><span class="step">4</span> Toppings <small>(opcional)</small></legend>
+              <div class="chips" id="opt-top"></div>
+            </fieldset>
+
+            <fieldset>
+              <legend><span class="step">5</span> Cantidad</legend>
+              <div class="qty">
+                <button type="button" id="q-minus" aria-label="Restar">−</button>
+                <output id="q-val" aria-live="polite">1</output>
+                <button type="button" id="q-plus" aria-label="Sumar">+</button>
+                <span class="soft" id="q-unit"></span>
+              </div>
+            </fieldset>
+
+            <button type="button" class="btn btn-lg btn-block" id="add-btn">Agregar al pedido · <span id="add-total">$0.00</span></button>
+          </div>
+
+          <aside class="cart" aria-label="Tu pedido">
+            <h3>Tu pedido</h3>
+            <ul class="cart-list" id="cart-list"></ul>
+            <p class="soft cart-empty" id="cart-empty">Aún no has agregado nada.</p>
+            <div class="cart-total"><span>Total</span><strong id="cart-total">$0.00</strong></div>
+            <div class="field">
+              <label for="cli">Tu nombre</label>
+              <input id="cli" type="text" maxlength="40" autocomplete="given-name" placeholder="¿A nombre de quién?">
+            </div>
+            <a class="btn btn-block" id="wa-btn" target="_blank" rel="noopener" aria-disabled="true">Enviar por WhatsApp</a>
+            <button type="button" class="btn btn-alt btn-block" id="copy-btn">Copiar comanda</button>
+            <button type="button" class="link-btn" id="repeat-btn" hidden>Repetir mi último pedido</button>
+            <p class="msg" id="cart-msg" role="status" aria-live="polite"></p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANADERIA -->
+    <section class="section section-sand" id="panaderia">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">Panadería</p>
+          <h2>Pan hecho con paciencia</h2>
+          <p class="prose">Además del café, Villa Rústica es una industria panificadora. Horneamos pan artesanal de fermentación lenta y también lo elaboramos a medida para <strong>restaurantes de alta cocina</strong>.</p>
+          <ul class="ticks">
+            <li>Pan de masa madre y piezas de servicio para mesa</li>
+            <li>Recetas a medida para cartas y menús degustación</li>
+            <li>Entrega antes del servicio</li>
+          </ul>
+          <a href="#contacto-rest" class="btn">Soy un restaurante</a>
+        </div>
+        <div class="bread-art" aria-hidden="true">
+          <svg viewBox="0 0 320 240" role="img" aria-label="">
+            <ellipse cx="160" cy="205" rx="130" ry="14" fill="#ddd0b2" opacity=".6"/>
+            <path d="M40 170c0-60 50-100 120-100s120 40 120 100c0 18-12 28-30 28H70c-18 0-30-10-30-28z" fill="#c98a4f"/>
+            <path d="M40 170c0-60 50-100 120-100s120 40 120 100" fill="none" stroke="#a96e2c" stroke-width="6" stroke-linecap="round"/>
+            <path d="M100 98l28 40M150 88l28 48M200 98l28 40" stroke="#f3dfc0" stroke-width="9" stroke-linecap="round"/>
+            <circle cx="70" cy="60" r="4" fill="#6b7b3a" opacity=".5"/><circle cx="262" cy="52" r="5" fill="#6b7b3a" opacity=".5"/><circle cx="240" cy="34" r="3" fill="#6b7b3a" opacity=".5"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- HISTORIA -->
+    <section class="section" id="historia">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">Nosotros</p>
+          <h2>Una casa en el campo, una planta que crece</h2>
+        </div>
+        <div class="prose">
+          <p>Nuestro logo lo dice todo: una casita sobre una colina y una planta que crece a su lado. Villa Rústica nace de querer que lo sencillo sepa bien: ingredientes honestos, recetas cuidadas y un trato cercano.</p>
+          <p>Trabajamos con pocas cosas y las hacemos con cariño: café bien extraído, leches para todos los gustos y toppings con carácter, como el piloncillo, la lavanda o la vainilla.</p>
+          <div class="values">
+            <div><strong>Hecho al momento</strong><span>Cada bebida se prepara cuando la pides.</span></div>
+            <div><strong>Para todos</strong><span>Leche deslactosada, de almendra o de avena.</span></div>
+            <div><strong>Sabores con raíz</strong><span>Piloncillo, lavanda y vainilla.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISITANOS -->
+    <section class="section section-dark" id="visitanos">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">Visítanos</p>
+          <h2>Ven por tu café, o pídelo por WhatsApp</h2>
+          <p class="prose">Escríbenos para pedidos, dudas o para encargar pan.</p>
+          <a class="btn" href="https://wa.me/19286554308" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+        </div>
+        <dl class="info">
+          <div><dt>WhatsApp / SMS</dt><dd><a href="tel:+19286554308">+1 928 655 4308</a></dd></div>
+          <div><dt>Dirección</dt><dd data-todo>[Agrega aquí la dirección]</dd></div>
+          <div><dt>Horario</dt><dd data-todo>[Agrega aquí el horario]</dd></div>
+          <div id="contacto-rest"><dt>Restaurantes</dt><dd>Escríbenos por WhatsApp con el nombre de tu restaurante y te armamos una degustación.</dd></div>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <a href="#top" class="brand"><img src="logo.png" alt="" width="36" height="34"><span>Villa Rústica</span></a>
+      <p>Café y panadería artesanal.</p>
+      <p class="muted">© <span id="year"></span> Villa Rústica</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
