@@ -209,18 +209,19 @@ declare
 begin
   if v_uid is null then raise exception 'Debes iniciar sesión para hacer tu pedido.'; end if;
   select u.email into v_email from auth.users u where u.id = v_uid;
-  if p_tipo not in ('restaurante', 'canasta') then raise exception 'Tipo de pedido no válido.'; end if;
+  if p_tipo is null or p_tipo not in ('restaurante', 'canasta') then raise exception 'Tipo de pedido no válido.'; end if;
   if coalesce(trim(p_nombre), '') = '' then raise exception 'Escribe tu nombre o el de tu negocio.'; end if;
   if v_tel <> '' and length(regexp_replace(v_tel, '[^0-9]', '', 'g')) < 10 then raise exception 'Escribe un celular válido (10 dígitos) o déjalo vacío.'; end if;
   if p_items is null or jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then raise exception 'Tu pedido está vacío.'; end if;
   if jsonb_array_length(p_items) > 40 then raise exception 'El pedido tiene demasiados productos.'; end if;
-  if exists (select 1 from jsonb_array_elements(p_items) i where coalesce((i ->> 'cantidad')::int, 0) <= 0) then
+  if exists (select 1 from jsonb_array_elements(p_items) i
+             where coalesce(i ->> 'cantidad', '') !~ '^[0-9]{1,4}$' or (i ->> 'cantidad')::int = 0) then
     raise exception 'Hay un pan con cantidad no válida.'; end if;
   select coalesce(sum((i ->> 'cantidad')::int), 0) into v_piezas from jsonb_array_elements(p_items) i;
   if p_tipo = 'restaurante' and v_piezas < 12 then raise exception 'El pedido para restaurante es de mínimo 12 piezas.'; end if;
   if p_tipo = 'canasta' and (v_piezas < 1 or v_piezas > 12) then raise exception 'La Canasta es de 1 a 12 piezas.'; end if;
   if p_subtotal is null or p_subtotal < 0 then raise exception 'El total no es válido.'; end if;
-  if p_entrega not in ('domicilio', 'pickup') then raise exception 'Elige entrega a domicilio o pick up.'; end if;
+  if p_entrega is null or p_entrega not in ('domicilio', 'pickup') then raise exception 'Elige entrega a domicilio o pick up.'; end if;
   if p_fecha is null or p_fecha < v_hoy + 2 then raise exception 'Los pedidos se hacen con 2 días de anticipación.'; end if;
   if p_fecha > v_hoy + 60 then raise exception 'Elige una fecha más cercana.'; end if;
   v_dow := extract(isodow from p_fecha);
@@ -228,7 +229,7 @@ begin
   if p_entrega = 'pickup' then
     if v_dow = 7 then raise exception 'Los domingos no hay pick up.'; end if;
     if v_hora is not null then
-      if v_hora !~ '^[0-9]{1,2}:[0-9]{2}$' then raise exception 'La hora de pick up no es válida.'; end if;
+      if v_hora !~ '^([01]?[0-9]|2[0-3]):[0-5][0-9]$' then raise exception 'La hora de pick up no es válida.'; end if;
       if v_hora::time < time '10:00' or v_hora::time > time '17:00' then raise exception 'El pick up es de 10:00 a 17:00.'; end if;
     end if;
     v_ciudad := nullif(trim(coalesce(p_ciudad, '')), '');
@@ -298,6 +299,65 @@ create trigger ventas_mostrador_actualizado before update on public.ventas_mostr
   for each row execute function public.tocar_actualizado();
 
 -- ---------------------------------------------------------------------
+-- 4b. El staff (no admin) solo puede cambiar lo que le toca
+-- ---------------------------------------------------------------------
+-- Café: estado, motivo, cobro, horas de cada paso, y los cafés y el total cuando edita
+-- un pedido en "espera" (la clienta aceptó otra leche, por ejemplo).
+create or replace function public.proteger_pedido_cafe() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if public.es_admin() then return new; end if;
+  if new.user_id is distinct from old.user_id or new.nombre is distinct from old.nombre
+     or new.telefono is distinct from old.telefono or new.hora_solicitada is distinct from old.hora_solicitada
+     or new.hora_asignada is distinct from old.hora_asignada or new.creado_en is distinct from old.creado_en then
+    raise exception 'El barista no puede cambiar el cliente ni la hora del pedido.';
+  end if;
+  return new;
+end; $$;
+drop trigger if exists pedidos_cafe_proteger on public.pedidos_cafe;
+create trigger pedidos_cafe_proteger before update on public.pedidos_cafe
+  for each row execute function public.proteger_pedido_cafe();
+
+-- Pan: el barista acepta, entrega y marca pagado. Fecha, panes y totales solo los cambia el admin.
+create or replace function public.proteger_pedido_pan() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if public.es_admin() then return new; end if;
+  if new.user_id is distinct from old.user_id or new.origen is distinct from old.origen or new.tipo is distinct from old.tipo
+     or new.nombre is distinct from old.nombre or new.telefono is distinct from old.telefono or new.email is distinct from old.email
+     or new.items is distinct from old.items or new.entrega is distinct from old.entrega or new.ciudad is distinct from old.ciudad
+     or new.codigo_postal is distinct from old.codigo_postal or new.direccion is distinct from old.direccion
+     or new.fecha is distinct from old.fecha or new.hora is distinct from old.hora or new.subtotal is distinct from old.subtotal
+     or new.comision is distinct from old.comision or new.total is distinct from old.total or new.creado_en is distinct from old.creado_en then
+    raise exception 'El barista solo puede aceptar, entregar y marcar pagado.';
+  end if;
+  if new.estado = 'cancelado' and old.estado is distinct from 'cancelado' then
+    raise exception 'Solo el administrador cancela pedidos de pan.';
+  end if;
+  return new;
+end; $$;
+drop trigger if exists pedidos_pan_proteger on public.pedidos_pan;
+create trigger pedidos_pan_proteger before update on public.pedidos_pan
+  for each row execute function public.proteger_pedido_pan();
+
+-- Ventas de mostrador: después de cobrar solo cambian estado, horas y cancelación.
+create or replace function public.proteger_venta_mostrador() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if public.es_admin() then return new; end if;
+  if new.area is distinct from old.area or new.items is distinct from old.items or new.total is distinct from old.total
+     or new.pago_metodo is distinct from old.pago_metodo or new.pago_recibido is distinct from old.pago_recibido
+     or new.pagado_en is distinct from old.pagado_en or new.creado_por is distinct from old.creado_por
+     or new.creado_en is distinct from old.creado_en then
+    raise exception 'Una venta cobrada no se edita: cancélala y vuelve a capturarla.';
+  end if;
+  return new;
+end; $$;
+drop trigger if exists ventas_mostrador_proteger on public.ventas_mostrador;
+create trigger ventas_mostrador_proteger before update on public.ventas_mostrador
+  for each row execute function public.proteger_venta_mostrador();
+
+-- ---------------------------------------------------------------------
 -- 5. Tiempo real
 -- ---------------------------------------------------------------------
 do $$
@@ -313,7 +373,10 @@ end $$;
 commit;
 
 -- =====================================================================
--- DESPUÉS: dar de alta al barista
+-- CUENTAS: por ahora la comandera entra con la cuenta de administrador
+-- (es_staff() incluye a los admins), así que no hace falta nada más.
+--
+-- MÁS ADELANTE, si quieres una cuenta de barista aparte:
 -- 1. Crea la cuenta del barista (Authentication → Users → Add user) con su correo y contraseña.
 -- 2. Ejecuta, con su correo:
 --      insert into public.staff (user_id) select id from auth.users where email = 'correo-del-barista@ejemplo.com';

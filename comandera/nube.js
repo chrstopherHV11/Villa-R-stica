@@ -249,6 +249,17 @@ const NUBE = (() => {
     };
   }
 
+  // Los pedidos de café de días anteriores que nunca se entregaron pasan a "perdido":
+  // así liberan su hora y no cuentan para el límite de 5 pedidos de la clienta.
+  function cerrarDiasAnteriores() {
+    const hoy = VR.dayKey();
+    const viejos = VR.S.cafe.filter((o) => o.origen === 'web' && ['nuevo', 'aceptado', 'espera', 'listo'].includes(o.estado) && VR.dayKey(o.hora) < hoy);
+    if (!viejos.length) return;
+    viejos.forEach((o) => { o.estadoPrevio = o.estado; o.estado = 'perdido'; o.perdido = Date.now(); if (!o.motivo) o.motivo = 'No se recogió'; });
+    VR.save();
+    VR.toast(`${viejos.length} pedido${viejos.length > 1 ? 's' : ''} de días anteriores pasaron a Pedidos perdidos`);
+  }
+
   let listo;
   const preparado = new Promise((r) => { listo = r; });
   async function arrancar() {
@@ -262,7 +273,7 @@ const NUBE = (() => {
       pantallaLogin(error ? 'Falta ejecutar la migración 03 en Supabase.' : requiere === 'admin' ? 'Esta cuenta no es de administrador.' : 'Esta cuenta no está dada de alta como barista.');
       return;
     }
-    try { await cargar(true); } catch (e) { VR.toast('No se pudieron cargar los pedidos: ' + e.message); }
+    try { await cargar(true); cerrarDiasAnteriores(); } catch (e) { VR.toast('No se pudieron cargar los pedidos: ' + e.message); }
     escuchar();
     listo();
   }
