@@ -170,15 +170,22 @@ const VR = (() => {
 
   // ---------- WhatsApp ----------
   // Muestra el mensaje ya escrito y un botón que abre WhatsApp con él.
-  function wa(tel, text) {
+  // Si el cliente no dejó celular (en pan es opcional), ofrece su correo.
+  function wa(tel, text, email) {
     let d = String(tel || '').replace(/\D/g, '');
     if (d.length === 10) d = '52' + d;
+    if (d.length < 10) {
+      const asunto = 'Tu pedido en Villa Rústica';
+      return modal(`<h2 class="m-title">Sin celular</h2>
+        <p class="hint">${email ? 'Este cliente no dejó celular. Mándale el mensaje a su correo: <b class="sel">' + esc(email) + '</b>' : 'Este cliente no dejó celular ni correo.'}</p>
+        <div class="wa-burbuja correo">${esc(text)}</div>
+        <div class="m-actions"><button class="btn ghost" data-close>Cerrar</button>${email ? `<a class="btn" href="mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(text)}" data-close>Escribir correo</a>` : ''}</div>`);
+    }
     const url = 'https://wa.me/' + d + '?text=' + encodeURIComponent(text);
-    const m = modal(`<h2 class="m-title">Mensaje por WhatsApp</h2>
+    return modal(`<h2 class="m-title">Mensaje por WhatsApp</h2>
       <p class="hint">Para ${esc(tel)}</p>
       <div class="wa-burbuja">${esc(text)}</div>
       <div class="m-actions"><button class="btn ghost" data-close>Ahora no</button><a class="btn wa" href="${url}" target="_blank" rel="noopener" data-close>Enviar por WhatsApp</a></div>`);
-    return m;
   }
   const first = (n) => String(n || '').trim().split(/\s+/)[0] || '';
   const MSG = {

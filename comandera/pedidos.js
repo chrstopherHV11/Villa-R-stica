@@ -233,7 +233,7 @@
       </div>
       ${conFecha ? `<div class="ped-fecha">${cap(VR.fechaCorta(o.fecha))} · ${zonaTxt(o)}</div>` : ''}
       <ul class="ped-items">${o.items.map((l) => `<li><span class="q">${l.qty}×</span><b>${esc(l.name)}</b>${VR.docenas(l.qty) ? `<span class="d">${VR.docenas(l.qty)}</span>` : ''}</li>`).join('')}</ul>
-      <div class="ped-meta">📞 ${esc(o.tel)}</div>
+      <div class="ped-meta">${o.tel ? '📞 ' + esc(o.tel) : ''}${o.tel && o.email ? ' · ' : ''}${o.email ? '✉ ' + esc(o.email) : ''}</div>
       <div class="ped-pie"><span class="tot">${money(t.total)}</span>${pagoLinea}</div>
       ${acc ? `<div class="ped-acc">${acc}</div>` : ''}
     </article>`;
@@ -266,8 +266,8 @@
   }
 
   function accionPan(a, o) {
-    if (a === 'aceptar') { o.estado = 'aceptado'; o.aceptado = Date.now(); VR.save(); render(); VR.wa(o.tel, VR.MSG.pan(o)); }
-    else if (a === 'reenviar') VR.wa(o.tel, VR.MSG.pan(o));
+    if (a === 'aceptar') { o.estado = 'aceptado'; o.aceptado = Date.now(); VR.save(); render(); VR.wa(o.tel, VR.MSG.pan(o), o.email); }
+    else if (a === 'reenviar') VR.wa(o.tel, VR.MSG.pan(o), o.email);
     else if (a === 'entregado') {
       // Entrega a domicilio: el repartidor cobra; el pago se marca después en "Entregados".
       o.estado = 'entregado'; o.entregado = Date.now(); VR.save(); render();

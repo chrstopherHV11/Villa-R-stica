@@ -130,7 +130,8 @@ create table if not exists public.pedidos_pan (
   folio int,                                                      -- folio corto de la comandera (mostrador)
   tipo text not null check (tipo in ('restaurante', 'canasta')),
   nombre text not null,
-  telefono text not null,
+  telefono text not null default '',                              -- opcional en pan
+  email text,                                                     -- se copia de la cuenta del cliente
   -- [{ "pan": "baguette", "nombre": "Baguette", "cantidad": 24, "importe": 1400 }]
   items jsonb not null check (jsonb_typeof(items) = 'array'),
   entrega text not null check (entrega in ('domicilio', 'pickup')),
@@ -176,17 +177,29 @@ create trigger pedidos_pan_actualizado before update on public.pedidos_pan
 
 -- RPC para la app de la página web. Valida las reglas de entrega y calcula la
 -- comisión con calcular_comision(). El subtotal lo manda la app (precios de catálogo).
+-- Reglas acordadas con la app de pedidos de pan:
+--   · Teléfono opcional (el correo de la cuenta se copia al pedido).
+--   · Domicilio con código postal: ciudad y comisión salen de calcular_comision; fuera de zona no se acepta.
+--   · Domicilio sin código postal: solo restaurantes de Mexicali (p_ciudad = 'Mexicali').
+--     En San Luis Río Colorado el código postal es obligatorio.
+--   · En Mexicali la Canasta no va a domicilio (puntos de entrega, próximamente): solo pick up.
+--   · Mexicali lunes y jueves; San Luis martes y viernes; pick up de lunes a sábado, de 10:00 a 17:00.
+drop function if exists public.crear_pedido_pan(text, text, text, jsonb, text, text, text, date, text, numeric);
 create or replace function public.crear_pedido_pan(
   p_tipo text, p_nombre text, p_telefono text, p_items jsonb, p_entrega text,
-  p_codigo_postal text, p_direccion text, p_fecha date, p_hora text, p_subtotal numeric)
+  p_codigo_postal text, p_ciudad text, p_direccion text, p_fecha date, p_hora text, p_subtotal numeric)
 returns table (id uuid, comision numeric, total numeric)
 language plpgsql security definer set search_path = public as $$
 #variable_conflict use_column
 declare
   zona constant text := 'America/Hermosillo';
+  msg_canasta constant text := 'En Mexicali la Canasta se entrega en puntos de entrega (próximamente). Elige pick up.';
   v_uid uuid := auth.uid();
   v_tel text := regexp_replace(coalesce(p_telefono, ''), '[^0-9+]', '', 'g');
+  v_cp text := nullif(trim(coalesce(p_codigo_postal, '')), '');
+  v_hora text := nullif(trim(coalesce(p_hora, '')), '');
   v_hoy date := (now() at time zone zona)::date;
+  v_email text;
   v_piezas int;
   v_dow int;
   v_ciudad text;
@@ -195,14 +208,15 @@ declare
   r record;
 begin
   if v_uid is null then raise exception 'Debes iniciar sesión para hacer tu pedido.'; end if;
+  select u.email into v_email from auth.users u where u.id = v_uid;
   if p_tipo not in ('restaurante', 'canasta') then raise exception 'Tipo de pedido no válido.'; end if;
   if coalesce(trim(p_nombre), '') = '' then raise exception 'Escribe tu nombre o el de tu negocio.'; end if;
-  if length(regexp_replace(v_tel, '[^0-9]', '', 'g')) < 10 then raise exception 'Escribe un celular válido (10 dígitos).'; end if;
+  if v_tel <> '' and length(regexp_replace(v_tel, '[^0-9]', '', 'g')) < 10 then raise exception 'Escribe un celular válido (10 dígitos) o déjalo vacío.'; end if;
   if p_items is null or jsonb_typeof(p_items) <> 'array' or jsonb_array_length(p_items) = 0 then raise exception 'Tu pedido está vacío.'; end if;
   if jsonb_array_length(p_items) > 40 then raise exception 'El pedido tiene demasiados productos.'; end if;
-  select coalesce(sum((i ->> 'cantidad')::int), 0) into v_piezas from jsonb_array_elements(p_items) i;
   if exists (select 1 from jsonb_array_elements(p_items) i where coalesce((i ->> 'cantidad')::int, 0) <= 0) then
     raise exception 'Hay un pan con cantidad no válida.'; end if;
+  select coalesce(sum((i ->> 'cantidad')::int), 0) into v_piezas from jsonb_array_elements(p_items) i;
   if p_tipo = 'restaurante' and v_piezas < 12 then raise exception 'El pedido para restaurante es de mínimo 12 piezas.'; end if;
   if p_tipo = 'canasta' and (v_piezas < 1 or v_piezas > 12) then raise exception 'La Canasta es de 1 a 12 piezas.'; end if;
   if p_subtotal is null or p_subtotal < 0 then raise exception 'El total no es válido.'; end if;
@@ -213,27 +227,40 @@ begin
 
   if p_entrega = 'pickup' then
     if v_dow = 7 then raise exception 'Los domingos no hay pick up.'; end if;
+    if v_hora is not null then
+      if v_hora !~ '^[0-9]{1,2}:[0-9]{2}$' then raise exception 'La hora de pick up no es válida.'; end if;
+      if v_hora::time < time '10:00' or v_hora::time > time '17:00' then raise exception 'El pick up es de 10:00 a 17:00.'; end if;
+    end if;
+    v_ciudad := nullif(trim(coalesce(p_ciudad, '')), '');
   else
-    select * into r from public.calcular_comision(p_codigo_postal, p_subtotal);
-    if r is null or not r.disponible then raise exception 'No entregamos en ese código postal.'; end if;
-    v_ciudad := r.ciudad;
+    if v_cp is not null then
+      select * into r from public.calcular_comision(v_cp, p_subtotal);
+      if r is null or not r.disponible then raise exception 'No entregamos en ese código postal. Elige pick up.'; end if;
+      v_ciudad := r.ciudad;
+      if p_tipo = 'canasta' then v_comision := coalesce(r.comision, 0); end if;  -- restaurante: envío gratis
+    elsif coalesce(p_ciudad, '') ilike '%mexicali%' then
+      if p_tipo = 'canasta' then raise exception '%', msg_canasta; end if;
+      v_ciudad := 'Mexicali';                                                    -- restaurante de Mexicali sin código postal
+    else
+      raise exception 'Escribe tu código postal para la entrega a domicilio.';
+    end if;
+    if v_ciudad ilike '%mexicali%' and p_tipo = 'canasta' then raise exception '%', msg_canasta; end if;
     if v_ciudad ilike '%mexicali%' and v_dow not in (1, 4) then raise exception 'En Mexicali entregamos lunes y jueves.'; end if;
     if v_ciudad ilike '%san luis%' and v_dow not in (2, 5) then raise exception 'En San Luis entregamos martes y viernes.'; end if;
-    if p_tipo = 'canasta' then v_comision := coalesce(r.comision, 0); end if;  -- restaurante: envío gratis
   end if;
 
   if (select count(*) from public.pedidos_pan pp where pp.user_id = v_uid and pp.estado = 'pendiente') >= 5 then
     raise exception 'Ya tienes 5 pedidos pendientes. Espera a que los confirmen.'; end if;
 
-  insert into public.pedidos_pan (user_id, origen, tipo, nombre, telefono, items, entrega, ciudad, codigo_postal,
+  insert into public.pedidos_pan (user_id, origen, tipo, nombre, telefono, email, items, entrega, ciudad, codigo_postal,
                                   direccion, fecha, hora, subtotal, comision, total)
-  values (v_uid, 'web', p_tipo, trim(p_nombre), v_tel, p_items, p_entrega, v_ciudad, nullif(trim(coalesce(p_codigo_postal, '')), ''),
-          coalesce(trim(p_direccion), ''), p_fecha, nullif(trim(coalesce(p_hora, '')), ''), p_subtotal, v_comision, p_subtotal + v_comision)
+  values (v_uid, 'web', p_tipo, trim(p_nombre), v_tel, v_email, p_items, p_entrega, v_ciudad, v_cp,
+          coalesce(trim(p_direccion), ''), p_fecha, v_hora, p_subtotal, v_comision, p_subtotal + v_comision)
   returning pedidos_pan.id into v_id;
   return query select v_id, v_comision, p_subtotal + v_comision;
 end; $$;
-revoke execute on function public.crear_pedido_pan(text, text, text, jsonb, text, text, text, date, text, numeric) from anon;
-grant execute on function public.crear_pedido_pan(text, text, text, jsonb, text, text, text, date, text, numeric) to authenticated;
+revoke execute on function public.crear_pedido_pan(text, text, text, jsonb, text, text, text, text, date, text, numeric) from anon;
+grant execute on function public.crear_pedido_pan(text, text, text, jsonb, text, text, text, text, date, text, numeric) to authenticated;
 
 -- ---------------------------------------------------------------------
 -- 4. Ventas de mostrador (café y pan de vitrina)

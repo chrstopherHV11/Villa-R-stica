@@ -137,7 +137,7 @@
     $('vista').innerHTML = `<div class="ped-head"><h1>Pedidos de pan</h1></div>
       <p class="hint" style="margin-top:-6px">El barista solo acepta pedidos de pan. Si uno no se puede cumplir, arréglalo con el cliente y cancélalo o cámbiale la fecha aquí.</p>
       <div class="card box">${list.length ? `<table class="tabla"><thead><tr><th>Fecha</th><th>Cliente</th><th>Pedido</th><th>Recibe</th><th class="num">Total</th><th>Estado</th><th></th></tr></thead><tbody>
-      ${list.map((o) => `<tr><td style="text-transform:capitalize">${VR.fechaCorta(o.fecha)}</td><td>${esc(o.cliente)}<br><small class="hint">${o.tipo === 'restaurante' ? 'Restaurante' : 'Canasta'} · ${esc(o.tel)}</small></td>
+      ${list.map((o) => `<tr><td style="text-transform:capitalize">${VR.fechaCorta(o.fecha)}</td><td>${esc(o.cliente)}<br><small class="hint">${o.tipo === 'restaurante' ? 'Restaurante' : 'Canasta'} · ${esc(o.tel || o.email || '')}</small></td>
         <td>${o.items.map((l) => `${l.qty} ${esc(l.name)}`).join('<br>')}</td><td>${o.entrega === 'entrega' ? esc(o.ciudad) : 'Pick up'}</td>
         <td class="num">${money(VR.breadTotals(o).total)}</td><td>${o.estado === 'nuevo' ? 'Nuevo' : 'Aceptado'}</td>
         <td style="white-space:nowrap"><button class="btn ghost sm" data-fecha="${o.id}">Cambiar fecha</button> <button class="btn ghost sm danger" data-cancelpan="${o.id}">Cancelar</button></td></tr>`).join('')}
@@ -162,7 +162,7 @@
           if (!b) return;
           o.fecha = b.dataset.nf; VR.save(); m.close(); pedidosPan();
           VR.toast('Fecha cambiada');
-          if (o.estado === 'aceptado') VR.wa(o.tel, VR.MSG.pan(o));
+          if (o.estado === 'aceptado') VR.wa(o.tel, VR.MSG.pan(o), o.email);
         };
       }
     };

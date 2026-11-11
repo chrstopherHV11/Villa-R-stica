@@ -83,6 +83,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.05; mar
 .btn.soft { background: var(--acento-claro); color: var(--cafe); }
 .btn.danger { background: var(--rojo); }
 .btn.wa { background: #1f8a4c; text-decoration: none; }
+.wa-burbuja.correo { background: var(--beige); color: var(--cafe); }
 .wa-burbuja { white-space: pre-line; background: #dcf3d6; color: #1d2b1a; border-radius: 4px 16px 16px 16px; padding: 12px 14px; font-size: 1rem; line-height: 1.45; }
 .btn.sm { min-height: 40px; padding: 8px 16px; font-size: .95rem; }
 .btn.lg { min-height: 58px; font-size: 1.15rem; }

@@ -65,7 +65,7 @@ const NUBE = (() => {
   }
   function panDesdeServidor(r) {
     return {
-      id: r.id, folio: r.folio || corto(r.id), origen: r.origen, tipo: r.tipo, cliente: r.nombre, tel: r.telefono,
+      id: r.id, folio: r.folio || corto(r.id), origen: r.origen, tipo: r.tipo, cliente: r.nombre, tel: r.telefono || '', email: r.email || '',
       items: (r.items || []).map((i) => ({ pan: i.pan, name: i.nombre, qty: Number(i.cantidad), importe: Number(i.importe) })),
       entrega: r.entrega === 'domicilio' ? 'entrega' : 'pickup', ciudad: ciudadLocal(r.ciudad), cp: r.codigo_postal, direccion: r.direccion,
       fecha: r.fecha, horaPickup: r.hora,
