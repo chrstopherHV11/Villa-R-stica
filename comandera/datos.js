@@ -4,7 +4,7 @@
 const VR = (() => {
   'use strict';
 
-  const KEY = 'vr-comandera-v2';
+  const KEY = 'vr-comandera-v3';
   const TZ = 'America/Hermosillo';
 
   // ---------- Catálogo de ejemplo (precios de prueba, se editan en Administración) ----------
@@ -27,13 +27,13 @@ const VR = (() => {
       { id: 'lavanda',    name: 'Lavanda',    price: 12, agotado: false },
       { id: 'piloncillo', name: 'Piloncillo', price: 8,  agotado: false },
     ],
+    // Mismos panes y precios que la app "La Villa Rústica Pedidos"
     breads: [
-      { id: 'baguette',  name: 'Baguette francés',   pieza: 45, docena: 480,  agotado: false },
-      { id: 'hogaza',    name: 'Hogaza de masa madre', pieza: 90, docena: 1000, agotado: false },
-      { id: 'centeno',   name: 'Pan de centeno',     pieza: 85, docena: 950,  agotado: false },
-      { id: 'focaccia',  name: 'Focaccia',           pieza: 70, docena: 780,  agotado: false },
-      { id: 'brioche',   name: 'Brioche',            pieza: 40, docena: 440,  agotado: false },
-      { id: 'croissant', name: 'Croissant',          pieza: 35, docena: 380,  agotado: false },
+      { id: 'baguette',   name: 'Baguette',                  pieza: 60,  docena: 700,  agotado: false },
+      { id: 'baguetteFr', name: 'Baguette estándar francés', pieza: 140, docena: 1599, agotado: false },
+      { id: 'campesino',  name: 'Campesino',                 pieza: 150, docena: 1759, agotado: false },
+      { id: 'barra',      name: 'Barra artesana',            pieza: 90,  docena: 999,  agotado: false },
+      { id: 'centeno',    name: 'Pan de centeno',            pieza: 99,  docena: 1099, agotado: false },
     ],
   };
 
@@ -119,9 +119,9 @@ const VR = (() => {
 
   // ---------- Pan ----------
   const ZONAS = { Mexicali: [1, 4], 'San Luis': [2, 5] }; // lunes/jueves · martes/viernes
+  // Cada docena completa de un mismo pan se cobra a precio de docena (igual que la app de pedidos).
   function breadLineTotal(tipo, b, qty) {
-    if (tipo === 'restaurante') return Math.floor(qty / 12) * b.docena + (qty % 12) * b.pieza;
-    return qty * b.pieza;
+    return Math.floor(qty / 12) * b.docena + (qty % 12) * b.pieza;
   }
   function breadTotals(o) {
     const sub = o.items.reduce((s, l) => s + l.importe, 0);
@@ -345,7 +345,20 @@ const VR = (() => {
       <circle cx="78" cy="58" r="${c.r + 7}" fill="#fff" stroke="#e6dcc4" stroke-width="2"/>
       <circle cx="78" cy="58" r="${c.r}" fill="${c.c}"/>${c.a}</svg>`;
   };
-  const loaf = () => `<svg viewBox="0 0 64 40" aria-hidden="true"><ellipse cx="32" cy="24" rx="28" ry="14" fill="#c48a52"/><ellipse cx="32" cy="21" rx="26" ry="12" fill="#d9a46c"/><path d="M16 16q4 6 0 12M28 13q4 7 0 15M40 13q4 7 0 15M52 16q3 5 0 11" stroke="#b07440" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`;
+  // Ilustraciones de pan: las mismas de la app "La Villa Rústica Pedidos".
+  function breadArt(id, w) {
+    w = w || 84;
+    const crust = '#B9844A', dark = '#8E5E2E', light = '#E3B97A', score = '#F2D7A6';
+    const s = {
+      baguette: `<svg viewBox="0 0 120 50" width="${w}" aria-hidden="true"><rect x="6" y="14" width="108" height="22" rx="11" fill="${crust}" transform="rotate(-8 60 25)"/><g stroke="${score}" stroke-width="3" stroke-linecap="round" transform="rotate(-8 60 25)"><path d="M24 20l10 10M44 20l10 10M64 20l10 10M84 20l10 10"/></g></svg>`,
+      baguetteFr: `<svg viewBox="0 0 120 50" width="${w}" aria-hidden="true"><rect x="2" y="18" width="116" height="15" rx="7.5" fill="${dark}" transform="rotate(-10 60 25)"/><g stroke="${light}" stroke-width="2.4" stroke-linecap="round" transform="rotate(-10 60 25)"><path d="M14 22l7 7M28 22l7 7M42 22l7 7M56 22l7 7M70 22l7 7M84 22l7 7M98 22l7 7"/></g></svg>`,
+      campesino: `<svg viewBox="0 0 120 70" width="${w}" aria-hidden="true"><ellipse cx="60" cy="38" rx="44" ry="28" fill="${crust}"/><ellipse cx="60" cy="34" rx="38" ry="22" fill="${light}" opacity=".35"/><path d="M42 26l36 22M78 26L42 48" stroke="${score}" stroke-width="3.5" stroke-linecap="round"/></svg>`,
+      barra: `<svg viewBox="0 0 120 60" width="${w}" aria-hidden="true"><ellipse cx="60" cy="32" rx="52" ry="20" fill="${crust}"/><path d="M22 34 Q60 14 98 30" stroke="${score}" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+      centeno: `<svg viewBox="0 0 120 70" width="${w}" aria-hidden="true"><ellipse cx="60" cy="38" rx="42" ry="27" fill="#6B4A2E"/><g fill="#EFE6D6" opacity=".7"><circle cx="44" cy="30" r="1.6"/><circle cx="56" cy="24" r="1.4"/><circle cx="70" cy="28" r="1.8"/><circle cx="80" cy="38" r="1.4"/><circle cx="50" cy="44" r="1.5"/><circle cx="64" cy="46" r="1.3"/><circle cx="38" cy="40" r="1.2"/></g><path d="M40 36h40" stroke="#C9A77C" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+    };
+    // Panes nuevos agregados en Administración usan la hogaza genérica.
+    return s[id] || s.campesino;
+  }
 
   // ---------- Armador de café (el mismo sistema que la web) ----------
   // el: contenedor · onAdd(line) · opts.initial · opts.addLabel
@@ -445,7 +458,7 @@ const VR = (() => {
     allowsNoMilk, hasTemp, coffeeUnit, coffeeDesc, coffeePhrase, coffeeLine, sum,
     breadLineTotal, breadTotals, breadLines, fechasValidas, docenas, ZONAS,
     wa, MSG, sound, audio, audioReady,
-    toast, modal, confirmar, pin, cobro, cup, loaf, coffeeBuilder, areaTabs,
+    toast, modal, confirmar, pin, cobro, cup, breadArt, coffeeBuilder, areaTabs,
     demoCafe, demoPan,
   };
 })();

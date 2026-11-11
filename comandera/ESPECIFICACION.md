@@ -38,6 +38,12 @@ Tiene una pestañita en la esquina para cambiar entre **Cafetería** y **Panader
 ### Tablet 2 · Pedidos (junto a la cafetera)
 También tiene la pestañita para cambiar entre **Cafetería** y **Panadería**. **Suena un aviso** cuando llega un pedido nuevo.
 
+**Distribución (revisión 2):**
+- **Cafetería:** dos columnas. A la izquierda, **Mostrador**. A la derecha, **Pick up** (pedidos de la web). Los pedidos por aceptar y los que esperan respuesta van en **beige**. Al aceptarlos se vuelven **blancos**, como las comandas normales.
+- **Panadería:** dos columnas, **Por confirmar** (beige) y **Confirmados** (blancos, por día de entrega y con el total a hornear de lo confirmado).
+- **Panadería · Entregados:** solo aparecen los pedidos ya entregados, cada uno con un interruptor **Pagado / Sin pagar**. Las entregas a domicilio se marcan "Entregado" sin cobrar. Cuando el repartidor llega con el dinero, se marcan como pagadas. El pick up se cobra al entregar.
+- Los panes, sus precios y sus ilustraciones son los mismos de la app "La Villa Rústica Pedidos". Cada docena completa de un mismo pan se cobra a precio de docena.
+
 **Pedido de café desde la web:**
 1. Llega el pedido y suena el aviso.
 2. El barista lo **acepta**, aunque sea para más tarde. Se abre WhatsApp con el mensaje ya escrito y el barista toca Enviar.

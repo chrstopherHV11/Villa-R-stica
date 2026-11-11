@@ -78,7 +78,7 @@
   const totalPiezas = () => Object.values(pan.qtys).reduce((s, q) => s + q, 0);
   function panLines() {
     if (pan.modo === 'vitrina') {
-      return Object.keys(pan.qtys).filter((id) => pan.qtys[id] > 0).map((id) => { const b = by(VR.S.catalog.breads, id); return { pan: id, name: b.name, qty: pan.qtys[id], importe: pan.qtys[id] * b.pieza }; });
+      return Object.keys(pan.qtys).filter((id) => pan.qtys[id] > 0).map((id) => { const b = by(VR.S.catalog.breads, id); return { pan: id, name: b.name, qty: pan.qtys[id], importe: VR.breadLineTotal('vitrina', b, pan.qtys[id]) }; });
     }
     return VR.breadLines(pan.tipo, pan.qtys);
   }
@@ -108,10 +108,10 @@
     const llenoCanasta = enc && pan.tipo === 'canasta' && totalPiezas() >= 12;
     $('breads').innerHTML = C.breads.map((b) => {
       const q = pan.qtys[b.id] || 0;
-      const imp = resto ? VR.breadLineTotal('restaurante', b, q) : q * b.pieza;
+      const imp = VR.breadLineTotal(pan.tipo, b, q);
       return `<div class="bread${q ? ' on' : ''}${b.agotado ? ' off' : ''}">
-        ${VR.loaf()}<b>${esc(b.name)}</b>
-        <span class="pr">${b.agotado ? 'Agotado' : money(b.pieza) + ' pieza' + (resto ? ' · ' + money(b.docena) + ' docena' : '')}</span>
+        <span class="bread-art">${VR.breadArt(b.id, 64)}</span><b>${esc(b.name)}</b>
+        <span class="pr">${b.agotado ? 'Agotado' : money(b.pieza) + ' pieza · ' + money(b.docena) + ' docena'}</span>
         <div class="ctl">
           <div class="mini-step">
             ${resto ? `<button type="button" data-b="${b.id}" data-d="-12" ${q < 12 || b.agotado ? 'disabled' : ''}>−12</button>` : ''}
@@ -120,7 +120,7 @@
             <button type="button" data-b="${b.id}" data-d="1" ${b.agotado || llenoCanasta ? 'disabled' : ''} aria-label="Añadir una pieza">+</button>
             ${resto ? `<button type="button" data-b="${b.id}" data-d="12" ${b.agotado ? 'disabled' : ''}>+12</button>` : ''}
           </div>
-          <span class="doc">${q ? (resto && VR.docenas(q) ? VR.docenas(q) + ' · ' : '') + money(imp) : ''}</span>
+          <span class="doc">${q ? (VR.docenas(q) ? VR.docenas(q) + ' · ' : '') + money(imp) : ''}</span>
         </div></div>`;
     }).join('');
 
@@ -141,7 +141,7 @@
     // Resumen
     const lines = panLines();
     $('pan-side-title').textContent = enc ? (pan.tipo === 'restaurante' ? 'Encargo · Restaurante' : 'Encargo · Canasta') : 'Venta de vitrina';
-    $('p-lines').innerHTML = lines.map((l) => `<li><span class="q">${l.qty}×</span><span><b>${esc(l.name)}</b>${enc && pan.tipo === 'restaurante' && VR.docenas(l.qty) ? `<span class="d">${VR.docenas(l.qty)}</span>` : ''}</span><span class="p">${money(l.importe)}</span></li>`).join('');
+    $('p-lines').innerHTML = lines.map((l) => `<li><span class="q">${l.qty}×</span><span><b>${esc(l.name)}</b>${VR.docenas(l.qty) ? `<span class="d">${VR.docenas(l.qty)}</span>` : ''}</span><span class="p">${money(l.importe)}</span></li>`).join('');
     $('p-empty').hidden = !!lines.length;
     const t = enc ? VR.breadTotals(encargoObj()) : { sub: lines.reduce((s, l) => s + l.importe, 0), comision: 0 };
     t.total = t.sub + t.comision;
