@@ -42,7 +42,7 @@
 
     $('vista').innerHTML = `
       <div class="ped-head"><h1>Corte de caja</h1>
-        <div style="display:flex;gap:8px;align-items:center" class="no-print"><input type="date" id="dia" value="${dia}" style="width:auto"><button class="btn ghost sm" id="imprimir">Imprimir</button></div></div>
+        <div style="display:flex;gap:8px;align-items:center" class="no-print"><input type="date" id="dia" value="${dia}" style="width:auto"></div></div>
       <p class="hint" style="margin-top:-6px">${VR.fechaLarga(dia).replace(/^./, (x) => x.toUpperCase())}</p>
       <div class="kpis">
         ${k('Total vendido', money(t(cobrados)), cobrados.length + ' cobros')}
@@ -72,7 +72,6 @@
         ${cobrados.length ? `<table class="tabla"><thead><tr><th>Hora</th><th>Área</th><th>Pedido</th><th>Origen</th><th>Pago</th><th class="num">Total</th></tr></thead><tbody>${cobrados.sort((a, b) => a.pago.at - b.pago.at).map((o) => `<tr><td>${VR.hora(o.pago.at)}</td><td>${o.area === 'cafe' ? 'Cafetería' : 'Panadería'}</td><td>#${o.folio} ${esc(o.cliente)}</td><td>${o.origen === 'web' ? 'Web' : o.tipo === 'vitrina' ? 'Vitrina' : 'Mostrador'}</td><td>${o.pago.metodo === 'efectivo' ? 'Efectivo' : 'Tarjeta'}</td><td class="num">${money(o.pago.total)}</td></tr>`).join('')}</tbody></table>` : '<p class="empty">Sin cobros.</p>'}
       </div>`;
     $('dia').onchange = (e) => { dia = e.target.value || VR.dayKey(); corte(); };
-    $('imprimir').onclick = () => window.print();
   }
 
   // ================= MENÚ Y PRECIOS =================

@@ -151,10 +151,16 @@ const VR = (() => {
   };
 
   // ---------- WhatsApp ----------
+  // Muestra el mensaje ya escrito y un botón que abre WhatsApp con él.
   function wa(tel, text) {
     let d = String(tel || '').replace(/\D/g, '');
     if (d.length === 10) d = '52' + d;
-    window.open('https://wa.me/' + d + '?text=' + encodeURIComponent(text), '_blank');
+    const url = 'https://wa.me/' + d + '?text=' + encodeURIComponent(text);
+    const m = modal(`<h2 class="m-title">Mensaje por WhatsApp</h2>
+      <p class="hint">Para ${esc(tel)}</p>
+      <div class="wa-burbuja">${esc(text)}</div>
+      <div class="m-actions"><button class="btn ghost" data-close>Ahora no</button><a class="btn wa" href="${url}" target="_blank" rel="noopener" data-close>Enviar por WhatsApp</a></div>`);
+    return m;
   }
   const first = (n) => String(n || '').trim().split(/\s+/)[0] || '';
   const MSG = {
