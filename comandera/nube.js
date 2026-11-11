@@ -14,7 +14,10 @@ const NUBE = (() => {
   }
 
   const cfg = window.VR_CONFIG;
-  const sb = window.supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, autoRefreshToken: true } });
+  // storageKey propio: la sesión de la comandera es independiente de la de la página web,
+  // aunque se abran en el mismo origen (por ejemplo, localhost:5500). Así entrar o salir aquí
+  // no cierra la sesión del cliente en la app, y se puede probar con dos cuentas a la vez.
+  const sb = window.supabase.createClient(cfg.url, cfg.key, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'vr-comandera-auth' } });
   const DIAS = 35; // historial que se carga (para el corte de caja del mes)
 
   // ---------- Conversión de estados ----------
