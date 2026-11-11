@@ -3,11 +3,10 @@ Industria panificadora para restaurantes de alta cocina.
 
 ## Comandera
 
-`comandera/index.html` es la comandera oficial para el personal de la cafetería:
+Prototipo de la comandera oficial en `comandera/` (abre `comandera/index.html`). La definición completa está en [`comandera/ESPECIFICACION.md`](comandera/ESPECIFICACION.md).
 
-- **Pedido**: mesa o para llevar, cafés de la carta oficial con temperatura, leche, toppings y notas, y productos de panadería configurables.
-- **Barra**: comandas en tiempo real con estados (Nueva → Preparando → Lista → Entregada) y aviso en rojo si llevan más de 10 min.
-- **Cobro**: cuentas abiertas agrupadas por mesa, propina, efectivo/tarjeta/transferencia, cálculo de cambio e impresión de ticket de 80 mm.
-- **Caja**: ventas del día, ticket promedio, totales por método, más vendidos, exportación CSV y cierre de día.
+- **Tablet 1 · Comandera rápida** (`rapida.html`): ventas de café y pan en el mostrador. Se puede voltear al cliente (modo cliente con PIN del barista).
+- **Tablet 2 · Pedidos** (`pedidos.html`): pedidos de la web y del mostrador, aviso con sonido, WhatsApp con un toque, pedidos perdidos y pan agrupado por día de entrega.
+- **Administración** (`admin.html`): corte de caja, menú, precios, agotados y pedidos de pan.
 
-Los datos se guardan en el dispositivo (localStorage). Si abres la Barra en otra pestaña del mismo equipo, se sincroniza sola (`comandera/index.html#barra`).
+Por ahora los datos se guardan en el navegador y se sincronizan entre pestañas del mismo equipo. El siguiente paso es conectarlo a Supabase. Precios de ejemplo · PIN `1234` · contraseña `villa`.

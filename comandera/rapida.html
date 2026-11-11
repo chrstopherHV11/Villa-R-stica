@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fffdf9">
+  <title>Comandera rápida · Villa Rústica</title>
+  <link rel="icon" href="../cafeteria/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body data-area="cafe">
+  <header class="top">
+    <div class="brand"><img src="../cafeteria/logo.png" alt="" width="36" height="34"><span><b>Villa Rústica</b><small id="sub">Comandera rápida</small></span></div>
+    <span class="spacer"></span>
+    <button type="button" class="btn ghost sm solo-barista" id="ventas">Ventas de hoy</button>
+    <button type="button" class="btn soft sm solo-barista" id="modo-cliente">Voltear al cliente</button>
+    <button type="button" class="btn ghost sm solo-cliente" id="soy-barista" aria-label="Acceso del barista">🔒 Barista</button>
+    <div class="area-tab" id="area-tab" role="group" aria-label="Cambiar área"></div>
+  </header>
+
+  <main class="rapida">
+    <!-- Cafetería -->
+    <section class="card panel" id="p-cafe">
+      <h2><span class="solo-barista">Café</span><span class="solo-cliente">Arma tu café ☕</span></h2>
+      <div id="builder"></div>
+    </section>
+    <aside class="card side" id="s-cafe">
+      <h2>Pedido</h2>
+      <label class="field"><span class="lbl">Nombre</span><input type="text" id="c-nombre" maxlength="30" autocomplete="off" placeholder="¿A nombre de quién?"></label>
+      <ul class="lines" id="c-lines"></ul>
+      <p class="empty" id="c-empty">Elige un café para empezar.</p>
+      <div class="total-row"><span>Total</span><strong id="c-total">$0</strong></div>
+      <button type="button" class="btn lg block" id="c-ok"></button>
+      <button type="button" class="btn ghost block" id="c-clear">Empezar de nuevo</button>
+    </aside>
+
+    <!-- Panadería -->
+    <section class="card panel" id="p-pan" hidden>
+      <div class="seg wide pan-modo" id="pan-modo" role="group">
+        <button type="button" data-modo="vitrina">Llevar ahora · vitrina</button>
+        <button type="button" data-modo="encargo">Encargo</button>
+      </div>
+      <div id="pan-tipo-wrap" hidden>
+        <div class="seg wide" id="pan-tipo" role="group" style="margin-bottom:14px">
+          <button type="button" data-tipo="restaurante">Restaurante · desde 12 piezas</button>
+          <button type="button" data-tipo="canasta">Canasta · 1 a 12 piezas</button>
+        </div>
+      </div>
+      <div class="breads" id="breads"></div>
+      <div class="datos" id="datos" hidden>
+        <label class="field"><span class="lbl" id="d-nombre-lbl">Nombre</span><input type="text" id="d-nombre" maxlength="40" autocomplete="off"></label>
+        <label class="field"><span class="lbl">Celular (10 dígitos)</span><input type="tel" id="d-tel" maxlength="14" inputmode="numeric" autocomplete="off" placeholder="653 123 4567"></label>
+        <div class="field full"><span class="lbl">¿Cómo lo recibe?</span>
+          <div class="seg wide" id="d-entrega" role="group"><button type="button" data-entrega="pickup">Pick up en Villa Rústica</button><button type="button" data-entrega="entrega">Entrega a domicilio</button></div>
+        </div>
+        <div class="field full" id="d-ciudad-wrap"><span class="lbl">Ciudad</span>
+          <div class="seg wide" id="d-ciudad" role="group"><button type="button" data-ciudad="Mexicali">Mexicali · lun y jue</button><button type="button" data-ciudad="San Luis">San Luis · mar y vie</button></div>
+        </div>
+        <div class="field full"><span class="lbl">Fecha</span><div class="fechas" id="d-fechas"></div></div>
+      </div>
+    </section>
+    <aside class="card side" id="s-pan" hidden>
+      <h2 id="pan-side-title">Pan</h2>
+      <ul class="lines" id="p-lines"></ul>
+      <p class="empty" id="p-empty">Elige los panes.</p>
+      <div class="sub-row" id="p-sub-row" hidden><span>Subtotal</span><span id="p-sub"></span></div>
+      <div class="sub-row" id="p-com-row" hidden><span>Envío Canasta San Luis (10%)</span><span id="p-com"></span></div>
+      <div class="total-row"><span id="p-total-lbl">Total</span><strong id="p-total">$0</strong></div>
+      <p class="aviso" id="p-aviso" hidden></p>
+      <button type="button" class="btn lg block" id="p-ok"></button>
+      <button type="button" class="btn ghost block" id="p-clear">Empezar de nuevo</button>
+    </aside>
+  </main>
+
+  <div class="gracias" id="gracias" hidden>
+    <div>
+      <h2 id="g-titulo"></h2>
+      <p id="g-texto"></p>
+      <div class="monto" id="g-monto"></div>
+      <div class="acciones">
+        <button type="button" class="btn ghost lg" id="g-volver">Cambiar mi pedido</button>
+        <button type="button" class="btn lg" id="g-barista">Barista: continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="datos.js"></script>
+  <script src="rapida.js"></script>
+</body>
+</html>

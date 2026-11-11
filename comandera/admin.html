@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fffdf9">
+  <title>Administración · Villa Rústica</title>
+  <link rel="icon" href="../cafeteria/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <section class="login" id="login">
+    <form class="card" id="login-form">
+      <img src="../cafeteria/logo.png" alt="" width="60" height="57" style="margin:0 auto">
+      <h1>Administración</h1>
+      <label class="field" style="text-align:left"><span class="lbl">Contraseña</span><input type="password" id="pass" autocomplete="current-password" required></label>
+      <button class="btn lg block" type="submit">Entrar</button>
+      <p class="nota-proto">Prototipo: contraseña <b>villa</b>. En la versión final se entra con tu cuenta de administrador de Supabase.</p>
+    </form>
+  </section>
+
+  <div id="app" hidden>
+    <header class="top">
+      <div class="brand"><img src="../cafeteria/logo.png" alt="" width="36" height="34"><span><b>Villa Rústica</b><small>Administración</small></span></div>
+      <span class="spacer"></span>
+      <button type="button" class="btn ghost sm" id="salir">Salir</button>
+    </header>
+    <main class="admin">
+      <nav class="admin-tabs" id="tabs" aria-label="Secciones">
+        <button type="button" data-tab="corte">Corte de caja</button>
+        <button type="button" data-tab="menu">Menú y precios</button>
+        <button type="button" data-tab="pan">Pedidos de pan</button>
+        <button type="button" data-tab="ajustes">Ajustes</button>
+      </nav>
+      <div id="vista"></div>
+    </main>
+  </div>
+
+  <script src="datos.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

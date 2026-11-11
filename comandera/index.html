@@ -3,176 +3,39 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#6b7b3a">
+  <meta name="theme-color" content="#faf5ec">
   <title>Comandera · Villa Rústica</title>
   <link rel="icon" href="../cafeteria/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="comandera.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
-  <header class="top">
-    <div class="brand"><img src="../cafeteria/logo.png" alt="" width="34" height="32"><span>Villa Rústica <small>Comandera</small></span></div>
-    <nav class="tabs" aria-label="Secciones">
-      <button type="button" data-view="pedido" aria-current="page">Pedido</button>
-      <button type="button" data-view="barra">Barra <span class="badge" id="b-barra" hidden></span></button>
-      <button type="button" data-view="cobro">Cobro <span class="badge" id="b-cobro" hidden></span></button>
-      <button type="button" data-view="caja">Caja</button>
-      <button type="button" data-view="ajustes" aria-label="Ajustes">⚙</button>
-    </nav>
-    <div class="clock" id="clock"></div>
-  </header>
-
-  <main>
-    <!-- PEDIDO -->
-    <section id="v-pedido" class="view">
-      <div class="pedido">
-        <div class="col">
-          <div class="card">
-            <h2>Destino</h2>
-            <div class="seg" id="dest-type">
-              <button type="button" data-dt="mesa">Mesa</button>
-              <button type="button" data-dt="llevar">Para llevar</button>
-            </div>
-            <div id="dest-mesas" class="mesas"></div>
-            <label id="dest-name" class="field" hidden>Nombre del cliente
-              <input type="text" id="in-name" maxlength="40" autocomplete="off" placeholder="Ej. Ana">
-            </label>
-          </div>
-
-          <div class="card">
-            <h2>Café</h2>
-            <div class="coffees" id="coffees"></div>
-            <div id="cfg" class="cfg">
-              <div class="row" id="cfg-temp-row">
-                <span class="lbl">Temperatura</span>
-                <div class="chips" id="cfg-temp"></div>
-              </div>
-              <div class="row">
-                <span class="lbl">Leche</span>
-                <div class="chips" id="cfg-milk"></div>
-              </div>
-              <div class="row">
-                <span class="lbl">Toppings</span>
-                <div class="chips" id="cfg-top"></div>
-              </div>
-              <div class="row">
-                <span class="lbl">Nota</span>
-                <input type="text" id="cfg-note" maxlength="60" autocomplete="off" placeholder="Ej. extra caliente, sin espuma…">
-              </div>
-              <div class="row add-row">
-                <div class="stepper">
-                  <button type="button" data-q="-1" aria-label="Menos">−</button>
-                  <output id="cfg-qty">1</output>
-                  <button type="button" data-q="1" aria-label="Más">+</button>
-                </div>
-                <button type="button" class="btn" id="cfg-add">Agregar · <span id="cfg-total">$0.00</span></button>
-              </div>
-            </div>
-          </div>
-
-          <div class="card" id="prod-card">
-            <h2>Panadería y otros</h2>
-            <div class="prods" id="prods"></div>
-            <p class="soft small" id="prods-empty">Agrega pan, bollería u otros productos en <button type="button" class="link" data-view="ajustes">Ajustes</button>.</p>
-          </div>
-        </div>
-
-        <aside class="col ticket-col">
-          <div class="card ticket">
-            <div class="ticket-head">
-              <h2>Comanda</h2>
-              <span class="pill" id="draft-dest">Sin destino</span>
-            </div>
-            <ul class="lines" id="draft-lines"></ul>
-            <p class="soft empty" id="draft-empty">Aún no hay productos.</p>
-            <label class="field">Nota para barra
-              <input type="text" id="in-note" maxlength="80" autocomplete="off" placeholder="Opcional">
-            </label>
-            <div class="total"><span>Total</span><strong id="draft-total">$0.00</strong></div>
-            <button type="button" class="btn btn-block btn-lg" id="send">Enviar a barra</button>
-            <button type="button" class="btn btn-ghost btn-block" id="clear">Vaciar</button>
-          </div>
-        </aside>
+  <main class="inicio">
+    <div class="inicio-in">
+      <img src="../cafeteria/logo.png" alt="" width="72" height="68">
+      <h1>Villa Rústica</h1>
+      <p class="sub">Comandera oficial</p>
+      <div class="puertas">
+        <a class="card puerta" href="rapida.html">
+          <span class="n">Tablet 1 · Mostrador</span>
+          <h2>Comandera rápida</h2>
+          <p>Captura ventas de café y pan. Se voltea al cliente para que pida él mismo.</p>
+        </a>
+        <a class="card puerta" href="pedidos.html">
+          <span class="n">Tablet 2 · Junto a la cafetera</span>
+          <h2>Pedidos</h2>
+          <p>Pedidos de la web y del mostrador: aceptar, preparar, avisar por WhatsApp y entregar.</p>
+        </a>
+        <a class="card puerta" href="admin.html">
+          <span class="n">Solo administrador</span>
+          <h2>Administración</h2>
+          <p>Menú, precios, agotados, corte de caja y pedidos de pan.</p>
+        </a>
       </div>
-    </section>
-
-    <!-- BARRA -->
-    <section id="v-barra" class="view" hidden>
-      <div class="view-head">
-        <h1>Barra</h1>
-        <div class="seg" id="barra-filter">
-          <button type="button" data-bf="activas">Activas</button>
-          <button type="button" data-bf="entregadas">Entregadas hoy</button>
-        </div>
-      </div>
-      <div class="board" id="board"></div>
-      <p class="soft empty-big" id="board-empty">No hay comandas pendientes. ☕</p>
-    </section>
-
-    <!-- COBRO -->
-    <section id="v-cobro" class="view" hidden>
-      <div class="view-head"><h1>Cuentas abiertas</h1></div>
-      <div class="cobro">
-        <div class="accounts" id="accounts"></div>
-        <div class="card pay" id="pay">
-          <p class="soft">Selecciona una cuenta para cobrarla.</p>
-        </div>
-      </div>
-      <p class="soft empty-big" id="accounts-empty">No hay cuentas por cobrar.</p>
-    </section>
-
-    <!-- CAJA -->
-    <section id="v-caja" class="view" hidden>
-      <div class="view-head">
-        <h1>Caja del día</h1>
-        <div class="actions">
-          <button type="button" class="btn btn-alt btn-sm" id="csv">Exportar CSV</button>
-          <button type="button" class="btn btn-sm" id="close-day">Cerrar día</button>
-        </div>
-      </div>
-      <div class="kpis" id="kpis"></div>
-      <div class="caja">
-        <div class="card"><h2>Más vendidos</h2><ol class="top" id="top"></ol></div>
-        <div class="card"><h2>Cobros</h2><div class="sales" id="sales"></div></div>
-      </div>
-      <div class="card" id="hist-card"><h2>Cierres anteriores</h2><div id="hist"></div></div>
-    </section>
-
-    <!-- AJUSTES -->
-    <section id="v-ajustes" class="view" hidden>
-      <div class="view-head"><h1>Ajustes</h1></div>
-      <div class="caja">
-        <div class="card">
-          <h2>Mesas</h2>
-          <label class="field">Número de mesas
-            <input type="number" id="in-tables" min="1" max="60" inputmode="numeric">
-          </label>
-          <h2 class="mt">Productos extra</h2>
-          <p class="soft small">Pan, bollería u otros productos de precio fijo. Los cafés se toman de la carta oficial.</p>
-          <form class="prod-form" id="prod-form">
-            <input type="text" id="pf-name" placeholder="Nombre (ej. Concha)" maxlength="40" required>
-            <input type="number" id="pf-price" placeholder="Precio" min="0" step="0.05" inputmode="decimal" required>
-            <button type="submit" class="btn btn-sm">Añadir</button>
-          </form>
-          <ul class="plist" id="plist"></ul>
-        </div>
-        <div class="card">
-          <h2>Carta de cafés</h2>
-          <div id="carta"></div>
-          <h2 class="mt">Datos</h2>
-          <p class="soft small">Los datos se guardan en este dispositivo. Abre la Barra en otra pestaña del mismo equipo y se sincroniza sola.</p>
-          <button type="button" class="btn btn-ghost btn-sm danger" id="reset">Borrar todos los datos</button>
-        </div>
-      </div>
-    </section>
+      <p class="nota-proto"><b>Prototipo.</b> Los datos se guardan en este equipo. Para probar abre la Comandera rápida y los Pedidos en dos pestañas o ventanas del mismo navegador: se sincronizan solas. Los precios son de ejemplo. PIN del barista: <b>1234</b> · contraseña de administración: <b>villa</b>.</p>
+    </div>
   </main>
-
-  <button type="button" class="jump" id="jump" hidden>Ver comanda · <span id="jump-n">0</span> · <strong id="jump-t">$0.00</strong></button>
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <div id="print" class="print-area"></div>
-
-  <script src="comandera.js"></script>
 </body>
 </html>
