@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500;600&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="estilos.css">
 </head>
-<body>
+<body data-requiere="admin">
   <section class="login" id="login">
     <form class="card" id="login-form">
       <img src="logo.png" alt="" width="60" height="57" style="margin:0 auto">
@@ -39,7 +39,10 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
   <script src="datos.js"></script>
+  <script src="nube.js"></script>
   <script src="admin.js"></script>
 </body>
 </html>

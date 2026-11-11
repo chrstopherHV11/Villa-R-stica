@@ -322,7 +322,8 @@
   $('activar').onclick = () => { VR.audio(); VR.sound('cafe'); $('sonido').hidden = true; };
 
   // Primera vez: pedidos de ejemplo para ver cómo luce
-  if (!VR.S.settings.sembrado) {
+  if (VR.online) document.querySelector('.demo-bar').hidden = true;
+  if (!VR.online && !VR.S.settings.sembrado) {
     VR.S.settings.sembrado = true;
     [8, 20, 75].forEach((m) => VR.demoCafe(m));
     const mostrador = VR.coffeeLine({ cafe: 'cappuccino', temp: 'hot', milk: 'alm', tops: [], qty: 1 });

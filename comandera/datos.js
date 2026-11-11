@@ -4,7 +4,9 @@
 const VR = (() => {
   'use strict';
 
-  const KEY = 'vr-comandera-v3';
+  // En línea: hay configuración de Supabase y la librería cargó. Con ?demo en la dirección se usa el modo demostración.
+  const ONLINE = !!(window.VR_CONFIG && window.VR_CONFIG.url && window.VR_CONFIG.key) && !/[?&]demo\b/.test(location.search);
+  const KEY = ONLINE ? 'vr-comandera-nube-v1' : 'vr-comandera-v3';
   const TZ = 'America/Hermosillo';
 
   // ---------- Catálogo de ejemplo (precios de prueba, se editan en Administración) ----------
@@ -18,6 +20,7 @@ const VR = (() => {
     ],
     milks: [
       { id: 'none',  name: 'Sin leche',    label: 'sin leche',          price: 0,  agotado: false },
+      { id: 'entera', name: 'Entera',      label: 'leche entera',       price: 0,  agotado: false },
       { id: 'desl',  name: 'Deslactosada', label: 'leche deslactosada', price: 10, agotado: false },
       { id: 'alm',   name: 'Almendra',     label: 'leche de almendra',  price: 15, agotado: false },
       { id: 'avena', name: 'Avena',        label: 'leche de avena',     price: 15, agotado: false },
@@ -52,9 +55,20 @@ const VR = (() => {
 
   const bc = 'BroadcastChannel' in window ? new BroadcastChannel(KEY) : null;
   const listeners = [];
+  const saveHooks = [];
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('No se pudo guardar'); }
     if (bc) bc.postMessage('cambio');
+    saveHooks.forEach((fn) => fn());
+  }
+  const onSave = (fn) => saveHooks.push(fn);
+  // Reemplaza los pedidos con los del servidor y avisa a la pantalla (para el sonido de pedidos nuevos).
+  function setData(cafe, pan, silencioso) {
+    const prev = { cafe: new Set(S.cafe.map((o) => o.id)), pan: new Set(S.pan.map((o) => o.id)) };
+    S.cafe = cafe; S.pan = pan;
+    try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* solo caché */ }
+    const p = silencioso ? { cafe: new Set(cafe.map((o) => o.id)), pan: new Set(pan.map((o) => o.id)) } : prev;
+    listeners.forEach((fn) => fn(p));
   }
   function changed() {
     const prev = { cafe: new Set(S.cafe.map((o) => o.id)), pan: new Set(S.pan.map((o) => o.id)) };
@@ -69,7 +83,7 @@ const VR = (() => {
   const $ = (id) => document.getElementById(id);
   const by = (arr, id) => arr.find((x) => x.id === id);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
-  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const uid = () => (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 7));
   const money = (v) => '$' + (Math.round(v * 100) / 100).toLocaleString('es-MX', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 });
   const hora = (ts) => new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit', hourCycle: 'h23', timeZone: TZ }).format(ts).replace(/^0(\d)/, '$1');
   const dayKey = (ts) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(ts == null ? Date.now() : ts);
@@ -91,28 +105,30 @@ const VR = (() => {
   const hasTemp = (id) => id === 'latte' || id === 'americano';
   function coffeeUnit(c) {
     const C = S.catalog;
-    return by(C.coffees, c.cafe).price + (by(C.milks, c.milk) || { price: 0 }).price + c.tops.reduce((s, t) => s + (by(C.toppings, t) || { price: 0 }).price, 0);
+    return (by(C.coffees, c.cafe) || { price: 0 }).price + (by(C.milks, c.milk) || { price: 0 }).price + c.tops.reduce((s, t) => s + (by(C.toppings, t) || { price: 0 }).price, 0);
   }
   function coffeeDesc(c) {
     const C = S.catalog, p = [];
     if (hasTemp(c.cafe)) p.push(c.temp === 'cold' ? 'Frío' : 'Caliente');
-    if (c.milk !== 'none') p.push(cap(by(C.milks, c.milk).label));
-    c.tops.forEach((t) => p.push(by(C.toppings, t).name));
+    if (c.milk !== 'none' && by(C.milks, c.milk)) p.push(cap(by(C.milks, c.milk).label));
+    c.tops.forEach((t) => p.push(by(C.toppings, t) ? by(C.toppings, t).name : t));
     return p.join(' · ');
   }
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   // "Latte frío con leche de avena y lavanda"
   function coffeePhrase(c, withQty) {
     const C = S.catalog;
-    let s = by(C.coffees, c.cafe).name;
+    let s = by(C.coffees, c.cafe) ? by(C.coffees, c.cafe).name : (c.name || c.cafe);
     if (hasTemp(c.cafe) && c.temp === 'cold') s += ' frío';
-    if (c.milk !== 'none') s += ' con ' + by(C.milks, c.milk).label;
-    if (c.tops.length) s += (c.milk !== 'none' ? ' y ' : ' con ') + c.tops.map((t) => by(C.toppings, t).name.toLowerCase()).join(' y ');
+    const leche = by(C.milks, c.milk);
+    if (c.milk !== 'none' && leche) s += ' con ' + leche.label;
+    if (c.tops.length) s += (c.milk !== 'none' && leche ? ' y ' : ' con ') + c.tops.map((t) => (by(C.toppings, t) ? by(C.toppings, t).name : t).toLowerCase()).join(' y ');
     return (withQty && c.qty > 1 ? c.qty + ' ' : '') + s;
   }
   // Congela nombre, descripción y precio al momento del pedido.
   function coffeeLine(c) {
-    return { cafe: c.cafe, temp: c.temp, milk: c.milk, tops: c.tops.slice(), qty: c.qty, name: by(S.catalog.coffees, c.cafe).name, desc: coffeeDesc(c), unit: coffeeUnit(c) };
+    const cafe = by(S.catalog.coffees, c.cafe);
+    return { cafe: c.cafe, temp: c.temp, milk: c.milk, tops: c.tops.slice(), qty: c.qty, name: cafe ? cafe.name : (c.name || c.cafe), desc: coffeeDesc(c), unit: coffeeUnit(c) };
   }
   const sum = (items) => items.reduce((s, l) => s + l.unit * l.qty, 0);
   const lista = (arr) => (arr.length < 2 ? arr.join('') : arr.slice(0, -1).join(', ') + ' y ' + arr[arr.length - 1]);
@@ -124,6 +140,8 @@ const VR = (() => {
     return Math.floor(qty / 12) * b.docena + (qty % 12) * b.pieza;
   }
   function breadTotals(o) {
+    // Pedidos del servidor: se respeta lo que calculó (comisión por código postal).
+    if (o.totalServidor != null) return { sub: o.subtotalServidor, comision: o.comisionServidor || 0, total: o.totalServidor };
     const sub = o.items.reduce((s, l) => s + l.importe, 0);
     const comision = o.tipo === 'canasta' && o.entrega === 'entrega' && o.ciudad === 'San Luis' ? Math.round(sub * 0.10 * 100) / 100 : 0;
     return { sub, comision, total: sub + comision };
@@ -364,7 +382,7 @@ const VR = (() => {
   // el: contenedor · onAdd(line) · opts.initial · opts.addLabel
   function coffeeBuilder(el, onAdd, opts) {
     opts = opts || {};
-    const blank = () => ({ cafe: null, temp: 'hot', milk: 'desl', tops: [], qty: 1 });
+    const blank = () => ({ cafe: null, temp: 'hot', milk: 'entera', tops: [], qty: 1 });
     let sel = opts.initial ? clone(opts.initial) : blank();
     function render() {
       const C = S.catalog;
@@ -393,7 +411,7 @@ const VR = (() => {
         sel = blank(); sel.cafe = d.cafe;
         if (keep) { sel.milk = keep.milk; sel.tops = keep.tops; sel.temp = keep.temp; }
         if (allowsNoMilk(d.cafe) && !keep) sel.milk = 'none';
-        if (sel.milk === 'none' && !allowsNoMilk(d.cafe)) sel.milk = 'desl';
+        if (sel.milk === 'none' && !allowsNoMilk(d.cafe)) sel.milk = 'entera';
         const m = by(S.catalog.milks, sel.milk);
         if (m && m.agotado) { const alt = S.catalog.milks.find((x) => !x.agotado && (x.id !== 'none' || allowsNoMilk(d.cafe))); sel.milk = alt ? alt.id : sel.milk; }
         sel.tops = sel.tops.filter((t) => !by(S.catalog.toppings, t).agotado);
@@ -453,7 +471,7 @@ const VR = (() => {
   function reset() { S = fresh(); save(); }
 
   return {
-    get S() { return S; }, save, onChange, reset, folio, uid,
+    get S() { return S; }, save, onChange, onSave, setData, online: ONLINE, reset, folio, uid,
     $, by, esc, money, hora, dayKey, addDays, fechaLarga, fechaCorta, pad, first,
     allowsNoMilk, hasTemp, coffeeUnit, coffeeDesc, coffeePhrase, coffeeLine, sum,
     breadLineTotal, breadTotals, breadLines, fechasValidas, docenas, ZONAS,

@@ -130,3 +130,18 @@ No hay mensaje de "va en camino": la hora de entrega se confirma aparte.
 1. Revisar el **prototipo** en las dos tablets y ajustar el diseño.
 2. Definir los **precios y el menú reales** y cargarlos desde la administración.
 3. Conectar con **Supabase**: tablas de pedidos y catálogo, cuentas de Barista y de Administrador, y Realtime entre tablets.
+
+## 11. Conexión con la página web (Supabase)
+
+- `config.js` tiene la dirección del proyecto y la clave pública, que es la misma que usan las apps de la página web.
+- `nube.js` lee y guarda en Supabase y recibe los pedidos en tiempo real:
+  - **Café de la web:** tabla `pedidos_cafe`, que ya existe. En la base de datos el estado "Por aceptar" se llama `pendiente`.
+  - **Pan de la web y encargos de mostrador:** tabla nueva `pedidos_pan`. La app de pan de la página la llena con la RPC `crear_pedido_pan`.
+  - **Ventas de mostrador** (café y pan de vitrina): tabla nueva `ventas_mostrador`, para que las dos tablets las compartan.
+- Cada tablet inicia sesión una vez con la cuenta del barista (tabla `staff`). La administración pide una cuenta de administrador.
+- `supabase/03_comandera.sql` es la migración necesaria. **No se ha ejecutado:** la tiene que revisar y ejecutar Chris.
+- Si un pedido en "Esperando respuesta" se resuelve, el barista lo edita y pasa directo a `aceptado`, en el mismo pedido. "Perdido" libera la hora.
+- Sin configuración, o abriendo una pantalla con `?demo`, la comandera funciona en modo demostración con datos locales.
+- **Pendiente:**
+  - El menú, los precios, los agotados y el PIN todavía se guardan en cada tablet por separado. Falta pasarlos a Supabase para que lo que cambies en Administración llegue a las tablets y a la página web.
+  - La comandera tiene que publicarse en una dirección web, por ejemplo GitHub Pages, para abrirla en las tablets.

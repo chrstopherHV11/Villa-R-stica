@@ -354,6 +354,16 @@ body:not(.kiosco) .solo-cliente { display: none !important; }
 .puerta p { margin: 0; color: var(--cafe-suave); }
 .inicio .nota-proto { margin-top: 22px; text-align: left; }
 
+/* ---------- Conexión con Supabase ---------- */
+.nube-estado { display: inline-flex; align-items: center; gap: 6px; font-family: var(--cond); font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; color: var(--cafe-suave); white-space: nowrap; }
+.nube-estado::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--linea); }
+.nube-estado[data-estado=ok]::before { background: var(--oliva); }
+.nube-estado[data-estado=error] { color: var(--rojo); }
+.nube-estado[data-estado=error]::before { background: var(--rojo); }
+.nube-login { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: var(--crema); }
+.nube-login .card { width: min(400px, 100%); padding: 28px; display: grid; gap: 14px; text-align: center; }
+.nube-login h1 { font-size: 2.2rem; }
+
 /* ---------- Responsivo ---------- */
 @media (max-width: 1000px) {
   .rapida { grid-template-columns: 1fr; }

@@ -190,5 +190,10 @@
   }
 
   VR.onChange(() => { if (dentro && tab !== 'menu') render(); });
-  if (dentro) abrir();
+  if (VR.online) {
+    // En línea entra con la cuenta de administrador de Supabase (la pide nube.js).
+    $('login').hidden = true;
+    $('salir').onclick = () => NUBE.salir();
+    if (NUBE.preparado) NUBE.preparado.then(() => { dentro = true; abrir(); });
+  } else if (dentro) abrir();
 })();
