@@ -356,6 +356,31 @@ const VR = (() => {
     paint();
   }
 
+  // Cobro con tarjeta (pantalla "Tap") para la barra: quien prepara el café no toca efectivo.
+  // Todavía no hay conexión con la terminal: el barista confirma cuando la terminal dice "Aprobado".
+  function cobroTap(total, titulo, cb) {
+    const m = modal(`
+      <div class="tap-escena" aria-hidden="true">
+        <div class="tap-luz"></div>
+        <img class="tap-logo" src="logo.png" alt="">
+        <div class="tap-tarjeta">
+          <svg viewBox="0 0 120 76"><rect x="1" y="1" width="118" height="74" rx="9" fill="#2f2620"/><rect x="14" y="22" width="20" height="15" rx="3" fill="#d8b56a"/>
+          <path d="M84 24a12 12 0 0 1 0 16M90 20a18 18 0 0 1 0 24M96 16a24 24 0 0 1 0 32" stroke="#efe6d6" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <rect x="14" y="54" width="52" height="5" rx="2.5" fill="#6e5643"/></svg>
+        </div>
+      </div>
+      <p class="tap-titulo">${titulo}</p>
+      <div class="tap-total">${money(total)}</div>
+      <p class="tap-instruccion">Acerca la tarjeta a la terminal</p>
+      <p class="hint tap-nota">La conexión directa con la terminal aún no está disponible. Confirma cuando la terminal diga <b>Aprobado</b>.</p>
+      <div class="m-actions"><button class="btn ghost" data-close>Cancelar</button><button class="btn" data-ok>Pago aprobado</button></div>`, { sticky: true });
+    m.el.classList.add('tap');
+    m.el.querySelector('[data-ok]').onclick = () => {
+      m.close();
+      cb({ metodo: 'tarjeta', total, recibido: total, cambio: 0, at: Date.now() });
+    };
+  }
+
   // ---------- Ilustraciones ----------
   const CUP = {
     espresso:   { r: 24, c: '#7a4a32', a: '<circle cx="78" cy="58" r="12" fill="#9b6444" opacity=".7"/>' },
@@ -484,7 +509,7 @@ const VR = (() => {
     allowsNoMilk, hasTemp, coffeeUnit, coffeeDesc, coffeePhrase, coffeeLine, sum,
     breadLineTotal, breadTotals, breadLines, fechasValidas, docenas, ZONAS,
     wa, MSG, sound, audio, audioReady,
-    toast, modal, confirmar, pin, cobro, cup, breadArt, coffeeBuilder, areaTabs,
+    toast, modal, confirmar, pin, cobro, cobroTap, cup, breadArt, coffeeBuilder, areaTabs,
     demoCafe, demoPan,
   };
 })();

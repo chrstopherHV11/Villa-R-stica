@@ -158,3 +158,13 @@ No hay mensaje de "va en camino": la hora de entrega se confirma aparte.
 - Las dos tablets se actualizan solas con Realtime.
 - **Choques:** cada cambio se guarda solo si el pedido sigue en el estado en que esa tablet lo vio. Si la otra tablet ya lo atendió, sale "Este pedido ya fue atendido en la otra tablet", se recarga y **no** se abre el WhatsApp.
 - Hoy las dos tablets entran con la cuenta de administrador, así que estos permisos se aplican en la pantalla. Para aplicarlos también en la base de datos haría falta una cuenta de staff por tablet (rol `mostrador` / `barista`) y una regla en los triggers. Eso queda pendiente de que Chris lo decida.
+
+## 13. Revisión 4
+
+- **Pan en el mostrador:** la Tablet 1 **acepta y entrega** pedidos de pan, pero **no los rechaza**. Entregar a domicilio es "Marcar entregado", y el pick up se cobra en efectivo o tarjeta. El interruptor de pagado sigue en la barra.
+- **La barra no toca efectivo:** cuando la Tablet 2 cobra, solo es con tarjeta, en una pantalla **"Tap"**. El logo vibra como si se estuviera conectando, una tarjeta entra desde abajo y detrás hay una luz verde tenue que se desvanece. Todavía no hay conexión con la terminal: el barista toca **"Pago aprobado"** cuando la terminal lo aprueba.
+- **Panadería con el tema de la app de pan:** al cambiar a Panadería, todo pasa al **tema oscuro verde olivo y beige** de la app de pedidos de pan:
+  - Fondo con degradado #46561F → #2A3410 y textura de puntos.
+  - Tarjetas #3C4A1B y texto beige #EFE6D6.
+  - Botón principal beige trigo #E9DDBF con letra #2C3712.
+  - Botones pill con letter-spacing .06em, logo en beige y dibujos de pan sobre su plato claro.

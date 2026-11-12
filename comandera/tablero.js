@@ -1,8 +1,9 @@
 // Villa Rústica · Comandera — tarjetas y acciones de pedidos, compartidas por las dos tablets.
 //   rol 'barra'     → Tablet 2 (pedidos.html, junto a la cafetera): puede todo.
-//   rol 'mostrador' → Tablet 1 (rapida.html): solo acepta, rechaza o pregunta por un cambio
-//                     (y edita y acepta cuando la clienta responde). No marca listo, entregado
-//                     ni pagado, ni retira comandas: eso es de la barra.
+//   rol 'mostrador' → Tablet 1 (rapida.html). Café: acepta, rechaza o pregunta por un cambio
+//                     (y edita y acepta cuando la clienta responde); no marca listo ni entregado.
+//                     Pan: acepta (no rechaza) y entrega (cobra el pick up en efectivo o tarjeta).
+//   La barra no toca efectivo: cuando cobra, es solo con tarjeta (pantalla "Tap").
 // Cada cambio se guarda solo si el pedido sigue como esta tablet lo vio (ver nube.js);
 // si la otra tablet ya lo atendió, se avisa y no se abre el WhatsApp.
 const TABLERO = (() => {
@@ -19,7 +20,7 @@ const TABLERO = (() => {
     { id: 'disponibilidad', name: 'Sin disponibilidad por el momento' },
     { id: 'otro', name: 'Otro' },
   ];
-  const PERMISOS_MOSTRADOR = ['c:aceptar', 'c:rechazar', 'c:editar', 'p:aceptar', 'p:reenviar'];
+  const PERMISOS_MOSTRADOR = ['c:aceptar', 'c:rechazar', 'c:editar', 'p:aceptar', 'p:reenviar', 'p:entregado', 'p:cobrar'];
 
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const pagoTxt = (p) => (p.metodo === 'efectivo' ? 'Efectivo' : 'Tarjeta');
@@ -32,6 +33,8 @@ const TABLERO = (() => {
     const render = opts.render || (() => {});
     const puede = (accion) => rol === 'barra' || PERMISOS_MOSTRADOR.includes(accion);
     const boton = (accion, html) => (puede(accion) ? html : '');
+    // La barra solo cobra con tarjeta; el mostrador cobra en efectivo o tarjeta.
+    const cobrar = (total, titulo, cb) => (rol === 'barra' ? VR.cobroTap(total, titulo, cb) : VR.cobro(total, titulo, cb));
 
     // Guarda y, solo si el pedido no lo cambió antes la otra tablet, sigue (WhatsApp, avisos…).
     function guardar(o, despues) {
@@ -94,7 +97,7 @@ const TABLERO = (() => {
       } else if (a === 'entregar') {
         const fin = () => { o.estado = 'entregado'; o.entregado = Date.now(); guardar(o, () => VR.toast(`#${o.folio} ${o.cliente} entregado`)); };
         if (o.pago) fin();
-        else VR.cobro(VR.sum(o.items), `Cobrar a ${esc(o.cliente)}`, (pago) => { o.pago = pago; fin(); });
+        else cobrar(VR.sum(o.items), `Cobrar a ${esc(o.cliente)}`, (pago) => { o.pago = pago; fin(); });
       } else if (a === 'rechazar') rechazar(o);
       else if (a === 'editar') editar(o);
       else if (a === 'perder') {
@@ -215,7 +218,7 @@ const TABLERO = (() => {
         o.estado = 'entregado'; o.entregado = Date.now();
         guardar(o, () => VR.toast(`${o.cliente}: entregado · márcalo como pagado cuando llegue el dinero`));
       } else if (a === 'cobrar') {
-        VR.cobro(VR.breadTotals(o).total, `Cobrar a ${esc(o.cliente)}`, (pago) => {
+        cobrar(VR.breadTotals(o).total, `Cobrar a ${esc(o.cliente)}`, (pago) => {
           o.pago = pago; o.estado = 'entregado'; o.entregado = Date.now();
           guardar(o, () => VR.toast(`Pedido de ${o.cliente} entregado y cobrado`));
         });
