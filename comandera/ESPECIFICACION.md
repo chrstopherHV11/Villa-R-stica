@@ -145,3 +145,16 @@ No hay mensaje de "va en camino": la hora de entrega se confirma aparte.
 - **Pendiente:**
   - El menú, los precios, los agotados y el PIN todavía se guardan en cada tablet por separado. Falta pasarlos a Supabase para que lo que cambies en Administración llegue a las tablets y a la página web.
   - La comandera tiene que publicarse en una dirección web, por ejemplo GitHub Pages, para abrirla en las tablets.
+
+## 12. Roles por tablet (revisión 3)
+
+- **Tablet 1 · Mostrador** (`rapida.html`): pantalla dividida.
+  - A la izquierda queda el menú para armar el pedido, igual que antes.
+  - A la derecha, los **pedidos de café y pan de la página web**, en tiempo real y con sonido.
+  - Desde aquí solo se puede **aceptar**, **rechazar o preguntar por un cambio** (estado "espera" con su WhatsApp) y **editar y aceptar** cuando la clienta responde. En pan, solo **aceptar y confirmar**.
+  - No marca listo, entregado ni pagado, ni retira comandas.
+  - En modo cliente (tablet volteada) el panel se oculta, para que el cliente no vea nombres ni teléfonos.
+- **Tablet 2 · Barra** (`pedidos.html`): puede todo. Es la **única** que marca listo y entregado, cobra al entregar, marca pagado y manda a perdidos.
+- Las dos tablets se actualizan solas con Realtime.
+- **Choques:** cada cambio se guarda solo si el pedido sigue en el estado en que esa tablet lo vio. Si la otra tablet ya lo atendió, sale "Este pedido ya fue atendido en la otra tablet", se recarga y **no** se abre el WhatsApp.
+- Hoy las dos tablets entran con la cuenta de administrador, así que estos permisos se aplican en la pantalla. Para aplicarlos también en la base de datos haría falta una cuenta de staff por tablet (rol `mostrador` / `barista`) y una regla en los triggers. Eso queda pendiente de que Chris lo decida.

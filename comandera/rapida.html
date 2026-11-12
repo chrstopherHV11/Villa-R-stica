@@ -21,6 +21,7 @@
     <div class="area-tab" id="area-tab" role="group" aria-label="Cambiar área"></div>
   </header>
 
+  <div class="mostrador-split">
   <main class="rapida">
     <!-- Cafetería -->
     <section class="card panel" id="p-cafe">
@@ -75,6 +76,17 @@
     </aside>
   </main>
 
+  <!-- Pedidos de la página web: el mostrador acepta, rechaza o pregunta; la barra prepara y entrega -->
+  <aside class="card pedidos-panel solo-barista" id="panel-pedidos" aria-label="Pedidos de la página web">
+    <div class="pp-head">
+      <h2>Pedidos de la web</h2>
+      <div class="seg" id="pp-area" role="group" aria-label="Café o pan"></div>
+    </div>
+    <p class="pp-nota">Aquí aceptas, rechazas o preguntas por un cambio. La tablet de la barra marca listo y entregado.</p>
+    <div id="pp-lista"></div>
+  </aside>
+  </div>
+
   <div class="gracias" id="gracias" hidden>
     <div>
       <h2 id="g-titulo"></h2>
@@ -91,6 +103,7 @@
   <script src="config.js"></script>
   <script src="datos.js"></script>
   <script src="nube.js"></script>
+  <script src="tablero.js"></script>
   <script src="rapida.js"></script>
 </body>
 </html>

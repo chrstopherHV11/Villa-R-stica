@@ -220,6 +220,21 @@ textarea { min-height: 120px; resize: vertical; line-height: 1.45; }
 .fechas { display: flex; flex-wrap: wrap; gap: 8px; }
 .aviso { padding: 10px 14px; border-radius: 12px; background: var(--espera-bg); color: #7a4612; font-size: .95rem; }
 
+/* Mostrador: pantalla dividida (menú a la izquierda, pedidos de la web a la derecha) */
+.mostrador-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, 38%); gap: 0 16px; align-items: start; padding-right: 16px; }
+.mostrador-split .rapida { grid-template-columns: 1fr; padding-right: 0; }
+.mostrador-split .side { position: static; }
+.pedidos-panel { position: sticky; top: 76px; margin-top: 16px; padding: 16px; display: grid; gap: 10px; max-height: calc(100dvh - 92px); overflow-y: auto; }
+.pp-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.pp-head h2 { font-size: 1.5rem; }
+.pp-nota { margin: 0; font-size: .85rem; color: var(--cafe-suave); }
+.pedidos-panel .ped { padding: 12px 14px; }
+.pedidos-panel .ped-nombre { font-size: 1.4rem; }
+.ped-nota { font-size: .88rem; color: var(--cafe-suave); font-style: italic; }
+body.kiosco .mostrador-split { grid-template-columns: 1fr; padding-right: 0; }
+body.kiosco .mostrador-split .rapida { grid-template-columns: minmax(0, 1fr) 380px; padding-right: 16px; }
+body.kiosco .mostrador-split .side { position: sticky; }
+
 /* Modo cliente (kiosco) */
 body.kiosco .solo-barista { display: none !important; }
 body:not(.kiosco) .solo-cliente { display: none !important; }
@@ -368,6 +383,8 @@ body:not(.kiosco) .solo-cliente { display: none !important; }
 /* ---------- Responsivo ---------- */
 @media (max-width: 1000px) {
   .rapida { grid-template-columns: 1fr; }
+  .mostrador-split, body.kiosco .mostrador-split .rapida { grid-template-columns: 1fr; padding-right: 0; }
+  .pedidos-panel { position: static; max-height: none; margin: 0 16px 16px; }
   .cols { grid-template-columns: 1fr; }
   .side { position: static; }
   .grid2 { grid-template-columns: 1fr; }

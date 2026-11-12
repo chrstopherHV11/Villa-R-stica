@@ -132,6 +132,7 @@ const NUBE = (() => {
 
   // ---------- Carga y tiempo real ----------
   let snap = new Map();      // id → JSON del pedido tal como está en el servidor
+  let estadoServidor = new Map(); // id → estado en el servidor cuando esta tablet lo cargó
   let tabla = new Map();     // id → tabla de origen
   const firma = (o) => JSON.stringify(o);
 
@@ -155,6 +156,7 @@ const NUBE = (() => {
       tabla.set(o.id, 'ventas_mostrador');
     });
     snap = new Map([...cafe, ...pan].map((o) => [o.id, firma(o)]));
+    estadoServidor = new Map([...c.data, ...p.data, ...v.data].map((r) => [r.id, r.estado]));
     VR.setData(cafe, pan, silencioso);
     estado('ok');
   }
@@ -175,9 +177,12 @@ const NUBE = (() => {
   }
 
   // ---------- Guardar lo que cambió ----------
-  let guardando = Promise.resolve();
+  // Cada cambio se guarda solo si el pedido sigue en el estado en que esta tablet lo vio.
+  // Si la otra tablet ya lo atendió, no se pisa: se avisa, se recarga y la acción no sigue.
+  let guardando = Promise.resolve([]);
   function sincronizar() {
-    guardando = guardando.then(async () => {
+    guardando = guardando.catch(() => []).then(async () => {
+      const choques = [];
       const ops = [];
       VR.S.cafe.forEach((o) => ops.push(['cafe', o]));
       VR.S.pan.forEach((o) => ops.push(['pan', o]));
@@ -190,17 +195,32 @@ const NUBE = (() => {
         if (area === 'cafe' && o.origen === 'web') { t = 'pedidos_cafe'; fila = cafeAServidor(o); if (nuevo) continue; }
         else if (area === 'cafe' || o.tipo === 'vitrina') { t = 'ventas_mostrador'; fila = ventaAServidor(o, area, nuevo); }
         else { t = 'pedidos_pan'; fila = panAServidor(o, nuevo); }
-        const q = nuevo ? sb.from(t).insert(fila) : sb.from(t).update(fila).eq('id', o.id);
-        const { error } = await q;
+        let q;
+        if (nuevo) q = sb.from(t).insert(fila);
+        else {
+          q = sb.from(t).update(fila).eq('id', o.id);
+          if (estadoServidor.has(o.id)) q = q.eq('estado', estadoServidor.get(o.id));
+          q = q.select('id');
+        }
+        const { data, error } = await q;
         if (error) {
           VR.toast('No se guardó en el servidor: ' + error.message);
           estado('error', error.message);
+          choques.push(o.id);
           await cargar(true).catch(() => {});
-          return;
+          return choques;
+        }
+        if (!nuevo && Array.isArray(data) && data.length === 0) {
+          VR.toast(`Este pedido ya fue atendido en la otra tablet (${o.cliente}).`);
+          choques.push(o.id);
+          await cargar(true).catch(() => {});
+          return choques;
         }
         snap.set(o.id, f);
         tabla.set(o.id, t);
+        if (fila.estado) estadoServidor.set(o.id, fila.estado);
       }
+      return choques;
     });
     return guardando;
   }

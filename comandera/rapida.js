@@ -253,9 +253,54 @@
   }
 
   // Cambios desde la administración (precios, agotados)
-  VR.onChange(() => { builder.render(); render(); });
+  // ---------- Panel de pedidos de la página web (rol mostrador) ----------
+  const T = TABLERO.crear({ rol: 'mostrador', render: () => renderPanel() });
+  let ppArea = 'cafe';
+  try { ppArea = sessionStorage.getItem('vr-pp-area') || 'cafe'; } catch (e) { /* */ }
+  function renderPanel() {
+    const hoy = VR.dayKey();
+    const cafe = VR.S.cafe.filter((o) => o.origen === 'web' && TABLERO.vivo(o))
+      .sort((a, b) => {
+        const pa = a.estado === 'espera' || a.estado === 'nuevo' ? 0 : 1, pb = b.estado === 'espera' || b.estado === 'nuevo' ? 0 : 1;
+        return pa - pb || a.hora - b.hora;
+      });
+    const porConfirmar = VR.S.pan.filter((o) => TABLERO.esPedidoPan(o) && o.estado === 'nuevo').sort((a, b) => a.fecha.localeCompare(b.fecha));
+    const proximos = VR.S.pan.filter((o) => TABLERO.esPedidoPan(o) && o.estado === 'aceptado' && o.fecha <= VR.addDays(hoy, 1)).sort((a, b) => a.fecha.localeCompare(b.fecha));
+    const nC = cafe.filter((o) => o.estado === 'nuevo').length, nP = porConfirmar.length;
+    $('pp-area').innerHTML = `<button type="button" data-pp="cafe" aria-pressed="${ppArea === 'cafe'}">Café${nC ? ` <span class="badge">${nC}</span>` : ''}</button>` +
+      `<button type="button" data-pp="pan" aria-pressed="${ppArea === 'pan'}">Pan${nP ? ` <span class="badge">${nP}</span>` : ''}</button>`;
+    let h;
+    if (ppArea === 'cafe') {
+      h = cafe.length ? `<div class="pila">${cafe.map((o) => T.cardCafe(o)).join('')}</div>` : '<p class="col-vacia">Sin pedidos de café de la web. Cuando llegue uno sonará un aviso.</p>';
+    } else {
+      h = `<p class="zona">Por confirmar · ${porConfirmar.length}</p>` +
+        (porConfirmar.length ? `<div class="pila">${porConfirmar.map((o) => T.cardPan(o, true)).join('')}</div>` : '<p class="col-vacia">Nada por confirmar.</p>') +
+        (proximos.length ? `<p class="zona">Confirmados para hoy y mañana · ${proximos.length}</p><div class="pila">${proximos.map((o) => T.cardPan(o, true)).join('')}</div>` : '');
+    }
+    $('pp-lista').innerHTML = h;
+  }
+  $('pp-area').onclick = (e) => {
+    const b = e.target.closest('[data-pp]');
+    if (!b) return;
+    ppArea = b.dataset.pp;
+    try { sessionStorage.setItem('vr-pp-area', ppArea); } catch (er) { /* */ }
+    renderPanel();
+  };
+  T.enlazar($('pp-lista'));
+  setInterval(renderPanel, 30000);
+
+  VR.onChange((prev) => {
+    builder.render(); render(); renderPanel();
+    const n = TABLERO.nuevosDeLaWeb(prev);
+    const o = n.pan[0] || n.cafe[0];
+    if (o) {
+      VR.sound(n.pan.length ? 'pan' : 'cafe');
+      if (!kiosco) VR.toast(n.pan.length ? `🥖 Nuevo pedido de pan: ${o.cliente}` : `☕ Nuevo pedido de la web: ${o.cliente}`);
+    }
+  });
 
   document.addEventListener('pointerdown', () => VR.audio(), { once: true });
   setKiosco(kiosco);
   setArea(area);
+  renderPanel();
 })();

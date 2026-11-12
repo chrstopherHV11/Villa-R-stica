@@ -59,7 +59,8 @@ const VR = (() => {
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('No se pudo guardar'); }
     if (bc) bc.postMessage('cambio');
-    saveHooks.forEach((fn) => fn());
+    // Devuelve una promesa con los ids de pedidos que no se guardaron porque la otra tablet ya los cambió.
+    return Promise.all(saveHooks.map((fn) => fn())).then((r) => [].concat(...r.filter(Array.isArray)));
   }
   const onSave = (fn) => saveHooks.push(fn);
   // Reemplaza los pedidos con los del servidor y avisa a la pantalla (para el sonido de pedidos nuevos).
