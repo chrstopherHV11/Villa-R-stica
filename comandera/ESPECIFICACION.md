@@ -168,3 +168,12 @@ No hay mensaje de "va en camino": la hora de entrega se confirma aparte.
   - Tarjetas #3C4A1B y texto beige #EFE6D6.
   - Botón principal beige trigo #E9DDBF con letra #2C3712.
   - Botones pill con letter-spacing .06em, logo en beige y dibujos de pan sobre su plato claro.
+
+## 14. Revisión 5 · Panadería con tarjetas beige
+
+Las tarjetas verdes se confundían con el fondo. Ahora el fondo sigue verde olivo, pero todo lo que se lee va en beige:
+- **Tarjetas** #EFE6D6 con borde #D9CBAE, radio 18 y sombra suave; texto café #3A2A1E.
+  - **Por confirmar:** #F4E6C6 con franja dorada #C9A55A.
+  - **Entregados:** #E4D7C0.
+- **Botones** sobre beige: principal #2C3712 con letra beige; ghost con borde #6E5643.
+- **Sobre el fondo verde:** las pestañas activas van en beige y las inactivas con borde. Títulos y encabezados de columna en beige.

@@ -28,55 +28,85 @@
   --campo: #fff;                 /* fondo de inputs y controles */
   --barra-top: var(--blanco);
 }
-/* ---------- Panadería: tema oscuro verde olivo y beige de la app de pedidos de pan ---------- */
+/* ---------- Panadería: fondo verde olivo de la app de pan, tarjetas y botones en beige ---------- */
 body[data-area=pan] {
-  --crema: #2E3913;        /* hojas, modales, inputs */
-  --beige: #2E3913;        /* fondos de segmentos y etiquetas */
-  --beige-2: #4B5B25;
-  --beige-ped: #4F5A22;    /* pedidos por aceptar: un tono más claro y cálido */
-  --linea: #5B6B34;
-  --cafe: #EFE6D6;         /* texto */
-  --cafe-suave: #C9BE9F;   /* texto secundario */
-  --blanco: #3C4A1B;       /* tarjetas */
-  --campo: #2E3913;
+  /* Superficies que se leen (tarjetas, modales, inputs): beige con texto café */
+  --crema: #F8F3EA;
+  --beige: #E4D7C0;
+  --beige-2: #D9CBAE;
+  --beige-ped: #F4E6C6;    /* por confirmar: beige más cálido */
+  --linea: #D3C4AA;
+  --cafe: #3A2A1E;
+  --cafe-suave: #6E5643;
+  --blanco: #EFE6D6;       /* tarjetas */
+  --campo: #F8F3EA;
   --barra-top: #26300F;
-  --acento: #E9DDBF;       /* beige trigo: botón principal y selecciones */
-  --acento-osc: #CDBE93;
-  --acento-tinta: #2C3712; /* letra verde oscuro sobre el beige */
-  --acento-claro: #55672A;
-  --oliva: #E9DDBF; --oliva-osc: #CDBE93; --oliva-claro: #55672A;
-  --espera: #D9B36A; --espera-bg: #4F5A22;
-  --rojo: #F0A98E; --rojo-bg: #5A3A22;
-  --azul: #A9C4D0;
-  color-scheme: dark;
+  --acento: #2C3712;       /* botón principal: verde muy oscuro con letra beige */
+  --acento-osc: #1F290B;
+  --acento-tinta: #EFE6D6;
+  --acento-claro: #DDE0C8;
+  --oliva: #2C3712; --oliva-osc: #1F290B; --oliva-claro: #DDE0C8;
+  --espera: #C9A55A; --espera-bg: #F4E6C6;
+  --rojo: #9A4A2E; --rojo-bg: #F1DFD3;
+  --tinta-verde: #EFE6D6;  /* texto directamente sobre el fondo verde */
+  --tinta-verde-2: #C9BE9F;
+  color: var(--tinta-verde);
   background: radial-gradient(120% 60% at 50% 0%, #4F6024 0%, transparent 65%) fixed, linear-gradient(170deg, #46561F, #2A3410) fixed;
 }
 body[data-area=pan]::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background-image: radial-gradient(rgba(239, 230, 214, .035) 1px, transparent 1.2px); background-size: 5px 5px;
 }
-body[data-area=pan] .top { border-bottom-color: #4B5B25; }
+body[data-area=pan] main, body[data-area=pan] .mostrador-split { position: relative; z-index: 1; }
+
+/* Todo lo que es tarjeta o ventana se lee en café sobre beige */
+body[data-area=pan] .card, body[data-area=pan] .ped, body[data-area=pan] .fila-pago, body[data-area=pan] .modal,
+body[data-area=pan] .demo-bar, body[data-area=pan] .sonido, body[data-area=pan] .gracias, body[data-area=pan] .nube-login { color: var(--cafe); }
+body[data-area=pan] .card, body[data-area=pan] .ped { border-color: #D9CBAE; }
+body[data-area=pan] .ped, body[data-area=pan] .fila-pago, body[data-area=pan] .pedidos-panel, body[data-area=pan] .rapida .card { box-shadow: 0 10px 24px rgba(0, 0, 0, .22); }
+body[data-area=pan] .ped { border-radius: 18px; background: #EFE6D6; border-left: 1px solid #D9CBAE; }
+body[data-area=pan] .ped.beige { background: #F4E6C6; border-left: 4px solid #C9A55A; }
+body[data-area=pan] .ped.entregado { background: #E4D7C0; opacity: .8; }
+body[data-area=pan] .fila-pago { background: #E4D7C0; border-color: #D9CBAE; }
+body[data-area=pan] .fila-pago.sin { background: #F4E6C6; border-left: 4px solid #C9A55A; }
+body[data-area=pan] .fila-pago:not(.sin) { opacity: .85; }
+body[data-area=pan] .tag { background: #E4D7C0; color: #3A2A1E; }
+body[data-area=pan] .tag.web { background: #DCE6EA; color: #34515E; }
+body[data-area=pan] .tag.estado { background: #2C3712; color: #EFE6D6; }
+body[data-area=pan] .ped.nuevo .tag.estado { background: #C9A55A; color: #2C3712; }
+body[data-area=pan] .bread-art { background: #F8F3EA; }
+body[data-area=pan] .bread.on { background: #F4E6C6; border-color: #C9A55A; }
+
+/* Botones: pill, peso 500, letter-spacing .06em */
 body[data-area=pan] .btn { font-weight: 500; letter-spacing: .06em; }
-body[data-area=pan] .btn.ghost { border-color: rgba(239, 230, 214, .5); }
-body[data-area=pan] .btn.ghost:hover { background: rgba(239, 230, 214, .08); }
-body[data-area=pan] .btn.danger { background: #9A4A2E; color: #EFE6D6; }
-body[data-area=pan] .btn.wa { color: #fff; }
-body[data-area=pan] .bread-art { background: #EFE6D6; }
-body[data-area=pan] .brand img, body[data-area=pan] .tap-logo { filter: brightness(0) invert(93%) sepia(12%) saturate(300%) hue-rotate(5deg); }
-body[data-area=pan] .chip[aria-pressed=true] small { color: #4B5B25; }
-body[data-area=pan] .tap-luz { background: radial-gradient(circle at 50% 45%, rgba(170, 220, 140, .5) 0%, rgba(170, 220, 140, .2) 38%, rgba(170, 220, 140, 0) 70%); }
-body[data-area=pan] .tag { color: #EFE6D6; }
-body[data-area=pan] .tag.web { background: #34515E; color: #D7E7EE; }
-body[data-area=pan] .tag.estado, body[data-area=pan] .badge { color: #2C3712; }
-body[data-area=pan] .ped.aceptado.pan .tag.estado { background: #E9DDBF; }
+body[data-area=pan] .btn.ghost { border: 1px solid #6E5643; color: #3A2A1E; }
+body[data-area=pan] .btn.ghost:hover { background: rgba(58, 42, 30, .06); }
+body[data-area=pan] .btn.soft { background: #E4D7C0; color: #2C3712; }
+body[data-area=pan] .btn:disabled { opacity: .42; }
+body[data-area=pan] .seg button[aria-pressed=true] { background: #2C3712; color: #EFE6D6; box-shadow: none; }
+
+/* Sobre el fondo verde: texto beige; pestañas activas en beige, inactivas con borde */
+body[data-area=pan] .top { border-bottom-color: #4B5B25; color: var(--tinta-verde); }
+body[data-area=pan] .brand img { filter: brightness(0) invert(93%) sepia(12%) saturate(300%) hue-rotate(5deg); }
+body[data-area=pan] .brand small, body[data-area=pan] .reloj, body[data-area=pan] .nube-estado { color: var(--tinta-verde-2); }
+body[data-area=pan] .top .btn.ghost { border-color: rgba(239, 230, 214, .5); color: #EFE6D6; }
+body[data-area=pan] .top .btn.soft { background: #EFE6D6; color: #2C3712; }
+body[data-area=pan] .area-tab, body[data-area=pan] .ped-head .seg { background: transparent; gap: 6px; padding: 0; }
+body[data-area=pan] .area-tab button, body[data-area=pan] .ped-head .seg button { border: 1px solid rgba(239, 230, 214, .5); background: transparent; color: #EFE6D6; }
+body[data-area=pan] .area-tab button[aria-pressed=true], body[data-area=pan] .ped-head .seg button[aria-pressed=true] { background: #EFE6D6; border-color: #EFE6D6; color: #2C3712; }
+body[data-area=pan] .badge { background: #C9A55A; color: #2C3712; }
+body[data-area=pan] .pedidos .col-head, body[data-area=pan] .pedidos .dia-head { border-bottom-color: rgba(239, 230, 214, .55); }
+body[data-area=pan] .pedidos .col-head .lbl, body[data-area=pan] .pedidos .hornear .lbl, body[data-area=pan] .pedidos .zona,
+body[data-area=pan] .pedidos .col-vacia, body[data-area=pan] .pedidos .vacio { color: var(--tinta-verde-2); }
+body[data-area=pan] .pedidos .vacio h3, body[data-area=pan] .pedidos .dia-head small { color: var(--tinta-verde); }
+body[data-area=pan] .pedidos .dia.atrasado .dia-head small { color: #F0A98E; }
+body[data-area=pan] .pedidos .hornear .tag { background: #EFE6D6; color: #2C3712; }
+body[data-area=pan] .col-n { background: #EFE6D6; color: #2C3712; }
+
+/* Mensajes */
 body[data-area=pan] .toast { background: #EFE6D6; color: #2C3712; }
-body[data-area=pan] .modal { background: #2E3913; color: #EFE6D6; }
-body[data-area=pan] .aviso { background: #4F5A22; color: #F3E3BE; }
-body[data-area=pan] .wa-burbuja.correo { background: #3C4A1B; color: #EFE6D6; }
-body[data-area=pan] .switch-ui { background: #5B6B34; }
-body[data-area=pan] .pedidos-panel, body[data-area=pan] .card { border-color: #4B5B25; }
-body[data-area=pan] main, body[data-area=pan] .mostrador-split, body[data-area=pan] .top { position: relative; z-index: 1; }
-body[data-area=pan] .top { position: sticky; }
+body[data-area=pan] .aviso { background: #F4E6C6; color: #6B4A12; }
+body[data-area=pan] .chip[aria-pressed=true] small { color: #DDE0C8; }
 
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
