@@ -1,9 +1,11 @@
 // Villa Rústica · Comandera — tarjetas y acciones de pedidos, compartidas por las dos tablets.
 //   rol 'barra'     → Tablet 2 (pedidos.html, junto a la cafetera): puede todo.
-//   rol 'mostrador' → Tablet 1 (rapida.html). Café: acepta, rechaza o pregunta por un cambio
-//                     (y edita y acepta cuando la clienta responde); no marca listo ni entregado.
-//                     Pan: acepta (no rechaza) y entrega (cobra el pick up en efectivo o tarjeta).
-//   La barra no toca efectivo: cuando cobra, es solo con tarjeta (pantalla "Tap").
+//   rol 'mostrador' → Tablet 1 (rapida.html, cajero). Café: acepta, rechaza o pregunta por un
+//                     cambio, edita y COBRA (efectivo o tarjeta). Pan: acepta y cobra.
+//                     Cobrar solo guarda el pago: NO marca entregado, ni retira, ni manda a
+//                     perdidos, ni cancela. La comanda sigue visible hasta que la barra la entrega.
+//   La barra (Tablet 2) es la única que entrega y retira; cuando cobra, es solo con tarjeta ("Tap").
+//   Antes de cobrar, la barra pregunta al servidor si el mostrador ya cobró, para no cobrar dos veces.
 // Cada cambio se guarda solo si el pedido sigue como esta tablet lo vio (ver nube.js);
 // si la otra tablet ya lo atendió, se avisa y no se abre el WhatsApp.
 const TABLERO = (() => {
@@ -20,7 +22,7 @@ const TABLERO = (() => {
     { id: 'disponibilidad', name: 'Sin disponibilidad por el momento' },
     { id: 'otro', name: 'Otro' },
   ];
-  const PERMISOS_MOSTRADOR = ['c:aceptar', 'c:rechazar', 'c:editar', 'p:aceptar', 'p:reenviar', 'p:entregado', 'p:cobrar'];
+  const PERMISOS_MOSTRADOR = ['c:aceptar', 'c:rechazar', 'c:editar', 'c:cobrar', 'p:aceptar', 'p:reenviar', 'p:cobrarSolo'];
 
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const pagoTxt = (p) => (p.metodo === 'efectivo' ? 'Efectivo' : 'Tarjeta');
@@ -63,14 +65,18 @@ const TABLERO = (() => {
         acc = boton('c:perder', `<button class="btn ghost sm" data-a="perder" data-id="${o.id}">A perdidos</button>`) +
           boton('c:editar', `<button class="btn" data-a="editar" data-id="${o.id}">Editar y aceptar</button>`);
       } else if (o.estado === 'aceptado') {
-        acc = boton('c:listo', `<button class="btn" data-a="listo" data-id="${o.id}">Marcar listo</button>`);
+        acc = (!o.pago && rol === 'mostrador' ? boton('c:cobrar', `<button class="btn" data-a="cobrar" data-id="${o.id}">Cobrar</button>`) : '') +
+          boton('c:listo', `<button class="btn" data-a="listo" data-id="${o.id}">Marcar listo</button>`);
       } else if (o.estado === 'listo') {
-        acc = (web ? boton('c:perder', `<button class="btn ghost sm" data-a="perder" data-id="${o.id}">A perdidos</button>`) : '') +
-          boton('c:entregar', `<button class="btn" data-a="entregar" data-id="${o.id}">${o.pago ? 'Entregado' : 'Cobrar y entregar'}</button>`);
+        acc = (!o.pago && rol === 'mostrador' ? boton('c:cobrar', `<button class="btn" data-a="cobrar" data-id="${o.id}">Cobrar</button>`) : '') +
+          (web ? boton('c:perder', `<button class="btn ghost sm" data-a="perder" data-id="${o.id}">A perdidos</button>`) : '') +
+          boton('c:entregar', `<button class="btn" data-a="entregar" data-id="${o.id}">${o.pago ? 'Entregar' : 'Cobrar y entregar'}</button>`);
       } else if (o.estado === 'perdido') {
         acc = boton('c:recuperar', `<button class="btn ghost sm" data-a="recuperar" data-id="${o.id}">Regresar a activos</button>`);
       }
       const nota = !acc && rol === 'mostrador' && (o.estado === 'aceptado' || o.estado === 'listo')
+        ? `<div class="ped-nota">${o.estado === 'listo' ? 'Listo en la barra · la barra lo entrega' : 'La barra lo está preparando'}</div>` : '';
+      const notaMostrador = rol === 'mostrador' && (o.estado === 'aceptado' || o.estado === 'listo')
         ? `<div class="ped-nota">${o.estado === 'listo' ? 'Listo en la barra · la barra lo entrega' : 'La barra lo está preparando'}</div>` : '';
       return `<article class="${cls}">
         <div class="ped-top">
@@ -82,8 +88,26 @@ const TABLERO = (() => {
         ${o.estado === 'espera' ? `<div class="motivo">💬 ${esc(o.motivo || '')} · mensaje enviado ${o.esperaDesde ? VR.hora(o.esperaDesde) : ''}</div>` : ''}
         ${tarde ? '<div class="tarde-msg">Pasaron más de 30 min de su hora de recogida.</div>' : ''}
         <div class="ped-pie"><span class="tot">${money(VR.sum(o.items))}</span>${o.pago ? `<span class="pagado">Pagado · ${pagoTxt(o.pago)}</span>` : '<span>Paga al recoger</span>'}</div>
-        ${acc ? `<div class="ped-acc">${acc}</div>` : nota}
+        ${acc ? `<div class="ped-acc">${acc}</div>${notaMostrador}` : nota}
       </article>`;
+    }
+
+    // Barra: antes de cobrar pregunta si el mostrador ya cobró; si sí, solo entrega.
+    function cobrarONo(o, total, cb) {
+      VR.pagoEnServidor(o).then((pago) => {
+        if (pago) { o.pago = pago; VR.toast(`${o.cliente} ya pagó en el mostrador (${pago.metodo === 'efectivo' ? 'efectivo' : 'tarjeta'})`); cb(pago, true); }
+        else cobrar(total, `Cobrar a ${esc(o.cliente)}`, (p) => cb(p, false));
+      });
+    }
+    // Mostrador: cobra sin cambiar el estado ni retirar la comanda.
+    function soloCobrar(o, total) {
+      cobrar(total, `Cobrar a ${esc(o.cliente)}`, (pago) => {
+        o.pago = pago;
+        render();
+        VR.guardarPago(o).then((ok) => {
+          if (ok) VR.toast(`${o.cliente}: pagado ${money(total)}${pago.cambio ? ' · Cambio ' + money(pago.cambio) : ''} · la barra lo entrega`);
+        });
+      });
     }
 
     function accionCafe(a, o) {
@@ -97,7 +121,9 @@ const TABLERO = (() => {
       } else if (a === 'entregar') {
         const fin = () => { o.estado = 'entregado'; o.entregado = Date.now(); guardar(o, () => VR.toast(`#${o.folio} ${o.cliente} entregado`)); };
         if (o.pago) fin();
-        else cobrar(VR.sum(o.items), `Cobrar a ${esc(o.cliente)}`, (pago) => { o.pago = pago; fin(); });
+        else cobrarONo(o, VR.sum(o.items), (pago) => { o.pago = pago; fin(); });
+      } else if (a === 'cobrar') {
+        if (!o.pago) soloCobrar(o, VR.sum(o.items));
       } else if (a === 'rechazar') rechazar(o);
       else if (a === 'editar') editar(o);
       else if (a === 'perder') {
@@ -180,10 +206,12 @@ const TABLERO = (() => {
       if (o.estado === 'nuevo') acc = boton('p:aceptar', `<button class="btn" data-p="aceptar" data-id="${o.id}">Aceptar y confirmar</button>`);
       else if (o.estado === 'aceptado') {
         acc = boton('p:reenviar', `<button class="btn ghost sm" data-p="reenviar" data-id="${o.id}">💬 Reenviar</button>`) +
-          (o.entrega === 'entrega'
-            ? boton('p:entregado', `<button class="btn" data-p="entregado" data-id="${o.id}">Marcar entregado</button>`)
+          (!o.pago ? boton('p:cobrarSolo', `<button class="btn" data-p="cobrarSolo" data-id="${o.id}">Cobrar</button>`) : '') +
+          (o.entrega === 'entrega' || o.pago
+            ? boton('p:entregado', `<button class="btn" data-p="entregado" data-id="${o.id}">${o.entrega === 'entrega' ? 'Marcar entregado' : 'Entregar'}</button>`)
             : boton('p:cobrar', `<button class="btn" data-p="cobrar" data-id="${o.id}">Cobrar y entregar</button>`));
       }
+      const notaPan = rol === 'mostrador' && o.estado === 'aceptado' ? '<div class="ped-nota">La barra marca la entrega</div>' : '';
       const pagoLinea = o.pago ? `<span class="pagado">Pagado · ${pagoTxt(o.pago)}</span>` : `<span>Paga al ${o.entrega === 'entrega' ? 'recibir' : 'recoger'}${t.comision ? ' · incl. 10% envío' : ''}</span>`;
       return `<article class="ped pan ${o.estado}${o.estado === 'nuevo' ? ' beige' : ''}">
         <div class="ped-top">
@@ -194,7 +222,7 @@ const TABLERO = (() => {
         <ul class="ped-items">${o.items.map((l) => `<li><span class="q">${l.qty}×</span><b>${esc(l.name)}</b>${VR.docenas(l.qty) ? `<span class="d">${VR.docenas(l.qty)}</span>` : ''}</li>`).join('')}</ul>
         <div class="ped-meta">${o.tel ? '📞 ' + esc(o.tel) : ''}${o.tel && o.email ? ' · ' : ''}${o.email ? '✉ ' + esc(o.email) : ''}</div>
         <div class="ped-pie"><span class="tot">${money(t.total)}</span>${pagoLinea}</div>
-        ${acc ? `<div class="ped-acc">${acc}</div>` : ''}
+        ${acc ? `<div class="ped-acc">${acc}</div>` : ''}${notaPan}
       </article>`;
     }
 
@@ -216,12 +244,14 @@ const TABLERO = (() => {
       else if (a === 'entregado') {
         // Entrega a domicilio: el repartidor cobra; el pago se marca después en "Entregados".
         o.estado = 'entregado'; o.entregado = Date.now();
-        guardar(o, () => VR.toast(`${o.cliente}: entregado · márcalo como pagado cuando llegue el dinero`));
+        guardar(o, () => VR.toast(o.pago ? `${o.cliente}: entregado` : `${o.cliente}: entregado · márcalo como pagado cuando llegue el dinero`));
       } else if (a === 'cobrar') {
-        cobrar(VR.breadTotals(o).total, `Cobrar a ${esc(o.cliente)}`, (pago) => {
+        cobrarONo(o, VR.breadTotals(o).total, (pago, yaPagado) => {
           o.pago = pago; o.estado = 'entregado'; o.entregado = Date.now();
-          guardar(o, () => VR.toast(`Pedido de ${o.cliente} entregado y cobrado`));
+          guardar(o, () => VR.toast(yaPagado ? `Pedido de ${o.cliente} entregado` : `Pedido de ${o.cliente} entregado y cobrado`));
         });
+      } else if (a === 'cobrarSolo') {
+        if (!o.pago) soloCobrar(o, VR.breadTotals(o).total);
       }
     }
     function togglePagado(o) {

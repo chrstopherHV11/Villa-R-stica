@@ -177,3 +177,17 @@ Las tarjetas verdes se confundían con el fondo. Ahora el fondo sigue verde oliv
   - **Entregados:** #E4D7C0.
 - **Botones** sobre beige: principal #2C3712 con letra beige; ghost con borde #6E5643.
 - **Sobre el fondo verde:** las pestañas activas van en beige y las inactivas con borde. Títulos y encabezados de columna en beige.
+
+## 15. Revisión 6 · La Tablet 1 es la caja
+
+- **Tablet 1 (mostrador, cajero):**
+  - **Café:** acepta, rechaza o pregunta por un cambio, edita y **cobra**.
+  - **Pan:** acepta y **cobra**. Los rechazos de pan los sigue resolviendo Chris.
+  - Cobra en **efectivo** (recibido y cambio) o con **tarjeta**, con la misma pantalla "Tap" de la Tablet 2.
+  - Cobrar **solo guarda el pago**: no marca entregado, no retira la comanda, no la manda a perdidos ni la cancela. La comanda sigue visible en las dos tablets con "Pagado · efectivo/tarjeta".
+- **Tablet 2 (barra):** es la única que entrega y retira. Si el pedido ya viene pagado, su botón dice "Entregar". Cuando cobra, sigue siendo solo con tarjeta.
+- **Sin pagos perdidos ni dobles:**
+  - El pago se guarda aparte del estado, con la condición "si todavía no está pagado". Si la barra entrega al mismo tiempo, el pago no se pierde.
+  - Si el pedido ya lo cobró la otra tablet, sale "ya estaba pagado en la otra tablet. No cobres de nuevo."
+  - Antes de cobrar, la Tablet 2 pregunta al servidor si el mostrador ya cobró. Si ya cobró, solo entrega.
+- El WhatsApp de "listo" dice "Ya está pagado." cuando el pedido se cobró antes.

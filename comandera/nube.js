@@ -226,6 +226,53 @@ const NUBE = (() => {
   }
   VR.onSave(sincronizar);
 
+  // ---------- Pagos ----------
+  // El cobro del mostrador solo escribe el pago y solo si el pedido aún no estaba pagado.
+  // No depende del estado: si la barra lo entrega al mismo tiempo, el pago no se pierde.
+  function tablaDe(o) {
+    if (VR.S.cafe.includes(o)) return o.origen === 'web' ? 'pedidos_cafe' : 'ventas_mostrador';
+    return o.tipo === 'vitrina' ? 'ventas_mostrador' : 'pedidos_pan';
+  }
+  function pagoDesdeFila(t, r) {
+    if (t === 'pedidos_cafe') {
+      if (!r.pago_metodo) return null;
+      const total = num(r.total);
+      return { metodo: r.pago_metodo, total, recibido: num(r.pago_recibido) != null ? num(r.pago_recibido) : total, cambio: num(r.cambio) || 0, at: ms(r.actualizado_en) };
+    }
+    if (!r.pagado) return null;
+    return { metodo: r.pago_metodo || 'efectivo', total: num(r.total), recibido: num(r.total), cambio: 0, at: ms(r.pagado_en) };
+  }
+  VR.onPago({
+    guardar: (o) => (guardando = guardando.catch(() => []).then(async () => {
+      const t = tablaDe(o);
+      if (t === 'ventas_mostrador') return true;
+      const p = o.pago;
+      let q;
+      if (t === 'pedidos_cafe') {
+        q = sb.from(t).update({ pago_metodo: p.metodo, pago_recibido: p.recibido, cambio: p.cambio, total: VR.sum(o.items) })
+          .eq('id', o.id).is('pago_metodo', null);
+      } else {
+        q = sb.from(t).update({ pagado: true, pago_metodo: p.metodo, pagado_en: iso(p.at) }).eq('id', o.id).eq('pagado', false);
+      }
+      const { data, error } = await q.select('id');
+      if (error || !data || !data.length) {
+        VR.toast(error ? 'No se guardó el pago: ' + error.message : `${o.cliente} ya estaba pagado en la otra tablet. No cobres de nuevo.`);
+        await cargar(true).catch(() => {});
+        return false;
+      }
+      snap.set(o.id, firma(o));
+      return true;
+    })),
+    consultar: async (o) => {
+      const t = tablaDe(o);
+      if (t === 'ventas_mostrador') return o.pago || null;
+      const cols = t === 'pedidos_cafe' ? 'pago_metodo,pago_recibido,cambio,total,actualizado_en' : 'pagado,pago_metodo,pagado_en,total';
+      const { data, error } = await sb.from(t).select(cols).eq('id', o.id).maybeSingle();
+      if (error || !data) return o.pago || null;
+      return pagoDesdeFila(t, data);
+    },
+  });
+
   // ---------- Indicador de conexión ----------
   function estado(tipo, msg) {
     let el = document.getElementById('nube-estado');

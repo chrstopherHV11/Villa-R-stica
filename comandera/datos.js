@@ -63,6 +63,19 @@ const VR = (() => {
     return Promise.all(saveHooks.map((fn) => fn())).then((r) => [].concat(...r.filter(Array.isArray)));
   }
   const onSave = (fn) => saveHooks.push(fn);
+  // Pagos: se guardan aparte del estado, para que un cobro en el mostrador nunca se pierda
+  // aunque la barra cambie el estado al mismo tiempo, y para no cobrar dos veces.
+  let pagoHooks = null;
+  const onPago = (h) => { pagoHooks = h; };
+  // Guarda solo el pago. Resuelve true si quedó guardado, false si el pedido ya estaba pagado.
+  function guardarPago(o) {
+    if (pagoHooks) return pagoHooks.guardar(o);
+    save(); return Promise.resolve(true);
+  }
+  // Pregunta al servidor si el pedido ya se pagó (por ejemplo, en la otra tablet hace un momento).
+  function pagoEnServidor(o) {
+    return pagoHooks ? pagoHooks.consultar(o) : Promise.resolve(o.pago || null);
+  }
   // Reemplaza los pedidos con los del servidor y avisa a la pantalla (para el sonido de pedidos nuevos).
   function setData(cafe, pan, silencioso) {
     const prev = { cafe: new Set(S.cafe.map((o) => o.id)), pan: new Set(S.pan.map((o) => o.id)) };
@@ -191,7 +204,7 @@ const VR = (() => {
   const first = (n) => String(n || '').trim().split(/\s+/)[0] || '';
   const MSG = {
     cafeAceptado: (o) => `¡Hola, ${first(o.cliente)}! ☕ Recibimos tu pedido: ${lista(o.items.map((c) => coffeePhrase(c, true)))}, para las ${hora(o.hora)}. Ya lo estamos preparando. — Villa Rústica`,
-    cafeListo: (o) => `¡${first(o.cliente)}, tu café ya está listo! 🌿 Pasa por él cuando gustes. Total a pagar: ${money(sum(o.items))}. Te esperamos.`,
+    cafeListo: (o) => `¡${first(o.cliente)}, tu café ya está listo! 🌿 Pasa por él cuando gustes. ${o.pago ? 'Ya está pagado.' : 'Total a pagar: ' + money(sum(o.items)) + '.'} Te esperamos.`,
     cafeRechazo(o, motivo) {
       const C = S.catalog, n = first(o.cliente), h = hora(o.hora);
       const conLeche = o.items.find((c) => c.milk !== 'none');
@@ -322,7 +335,7 @@ const VR = (() => {
     function paint() {
       m.el.querySelectorAll('[data-m]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.m === metodo));
       if (metodo === 'tarjeta') {
-        body.innerHTML = '<p class="hint">Cobra <b>' + money(total) + '</b> en la terminal y confirma cuando salga aprobado.</p>';
+        body.innerHTML = '<p class="hint">Al confirmar se abre la pantalla para cobrar <b>' + money(total) + '</b> con tarjeta en la terminal.</p>';
         ok.disabled = false; return;
       }
       const cambio = recibido == null ? null : recibido - total;
@@ -349,9 +362,10 @@ const VR = (() => {
       else if (b.dataset.b) { recibido = +b.dataset.b; paint(); }
     });
     ok.onclick = () => {
-      const pago = { metodo, total, recibido: metodo === 'efectivo' ? recibido : total, cambio: metodo === 'efectivo' ? recibido - total : 0, at: Date.now() };
       m.close();
-      cb(pago);
+      // Tarjeta: la misma pantalla "Tap" que la barra.
+      if (metodo === 'tarjeta') { cobroTap(total, titulo, cb); return; }
+      cb({ metodo, total, recibido, cambio: recibido - total, at: Date.now() });
     };
     paint();
   }
@@ -504,7 +518,7 @@ const VR = (() => {
   function reset() { S = fresh(); save(); }
 
   return {
-    get S() { return S; }, save, onChange, onSave, setData, online: ONLINE, reset, folio, uid,
+    get S() { return S; }, save, onChange, onSave, onPago, guardarPago, pagoEnServidor, setData, online: ONLINE, reset, folio, uid,
     $, by, esc, money, hora, dayKey, addDays, fechaLarga, fechaCorta, pad, first,
     allowsNoMilk, hasTemp, coffeeUnit, coffeeDesc, coffeePhrase, coffeeLine, sum,
     breadLineTotal, breadTotals, breadLines, fechasValidas, docenas, ZONAS,
