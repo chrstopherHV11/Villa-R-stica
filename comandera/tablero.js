@@ -22,7 +22,7 @@ const TABLERO = (() => {
     { id: 'disponibilidad', name: 'Sin disponibilidad por el momento' },
     { id: 'otro', name: 'Otro' },
   ];
-  const PERMISOS_MOSTRADOR = ['c:aceptar', 'c:rechazar', 'c:editar', 'c:cobrar', 'p:aceptar', 'p:reenviar', 'p:cobrarSolo'];
+  const PERMISOS_MOSTRADOR = ['c:aceptar', 'c:rechazar', 'c:editar', 'c:cobrar', 'p:aceptar', 'p:aceptarCobrar', 'p:reenviar', 'p:cobrarSolo'];
 
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   const pagoTxt = (p) => (p.metodo === 'efectivo' ? 'Efectivo' : 'Tarjeta');
@@ -203,7 +203,10 @@ const TABLERO = (() => {
     function cardPan(o, conFecha) {
       const t = VR.breadTotals(o);
       let acc = '';
-      if (o.estado === 'nuevo') acc = boton('p:aceptar', `<button class="btn" data-p="aceptar" data-id="${o.id}">Aceptar y confirmar</button>`);
+      if (o.estado === 'nuevo') {
+        acc = (rol === 'mostrador' ? boton('p:aceptarCobrar', `<button class="btn ghost" data-p="aceptarCobrar" data-id="${o.id}">Aceptar y cobrar</button>`) : '') +
+          boton('p:aceptar', `<button class="btn" data-p="aceptar" data-id="${o.id}">Aceptar y confirmar</button>`);
+      }
       else if (o.estado === 'aceptado') {
         acc = boton('p:reenviar', `<button class="btn ghost sm" data-p="reenviar" data-id="${o.id}">💬 Reenviar</button>`) +
           (!o.pago ? boton('p:cobrarSolo', `<button class="btn" data-p="cobrarSolo" data-id="${o.id}">Cobrar</button>`) : '') +
@@ -249,6 +252,12 @@ const TABLERO = (() => {
         cobrarONo(o, VR.breadTotals(o).total, (pago, yaPagado) => {
           o.pago = pago; o.estado = 'entregado'; o.entregado = Date.now();
           guardar(o, () => VR.toast(yaPagado ? `Pedido de ${o.cliente} entregado` : `Pedido de ${o.cliente} entregado y cobrado`));
+        });
+      } else if (a === 'aceptarCobrar') {
+        // Primero cobra; al confirmar el pago, acepta y manda la confirmación por WhatsApp.
+        cobrar(VR.breadTotals(o).total, `Cobrar a ${esc(o.cliente)}`, (pago) => {
+          o.pago = pago; o.estado = 'aceptado'; o.aceptado = Date.now();
+          guardar(o, () => { VR.toast(`${o.cliente}: aceptado y pagado`); VR.wa(o.tel, VR.MSG.pan(o), o.email); });
         });
       } else if (a === 'cobrarSolo') {
         if (!o.pago) soloCobrar(o, VR.breadTotals(o).total);

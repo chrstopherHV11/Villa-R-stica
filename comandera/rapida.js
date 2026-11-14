@@ -265,7 +265,10 @@
         return pa - pb || a.hora - b.hora;
       });
     const porConfirmar = VR.S.pan.filter((o) => TABLERO.esPedidoPan(o) && o.estado === 'nuevo').sort((a, b) => a.fecha.localeCompare(b.fecha));
-    const proximos = VR.S.pan.filter((o) => TABLERO.esPedidoPan(o) && o.estado === 'aceptado' && o.fecha <= VR.addDays(hoy, 1)).sort((a, b) => a.fecha.localeCompare(b.fecha));
+    // Todos los aceptados que aún no se entregan, de cualquier fecha: así se pueden cobrar por adelantado.
+    const aceptados = VR.S.pan.filter((o) => TABLERO.esPedidoPan(o) && o.estado === 'aceptado').sort((a, b) => a.fecha.localeCompare(b.fecha));
+    const porCobrar = aceptados.filter((o) => !o.pago);
+    const pagados = aceptados.filter((o) => o.pago);
     const nC = cafe.filter((o) => o.estado === 'nuevo').length, nP = porConfirmar.length;
     $('pp-area').innerHTML = `<button type="button" data-pp="cafe" aria-pressed="${ppArea === 'cafe'}">Café${nC ? ` <span class="badge">${nC}</span>` : ''}</button>` +
       `<button type="button" data-pp="pan" aria-pressed="${ppArea === 'pan'}">Pan${nP ? ` <span class="badge">${nP}</span>` : ''}</button>`;
@@ -275,7 +278,9 @@
     } else {
       h = `<p class="zona">Por confirmar · ${porConfirmar.length}</p>` +
         (porConfirmar.length ? `<div class="pila">${porConfirmar.map((o) => T.cardPan(o, true)).join('')}</div>` : '<p class="col-vacia">Nada por confirmar.</p>') +
-        (proximos.length ? `<p class="zona">Confirmados para hoy y mañana · ${proximos.length}</p><div class="pila">${proximos.map((o) => T.cardPan(o, true)).join('')}</div>` : '');
+        `<p class="zona">Por cobrar · ${porCobrar.length}</p>` +
+        (porCobrar.length ? `<div class="pila">${porCobrar.map((o) => T.cardPan(o, true)).join('')}</div>` : '<p class="col-vacia">Nada pendiente de cobro.</p>') +
+        (pagados.length ? `<p class="zona">Pagados · esperando entrega · ${pagados.length}</p><div class="pila">${pagados.map((o) => T.cardPan(o, true)).join('')}</div>` : '');
     }
     $('pp-lista').innerHTML = h;
   }

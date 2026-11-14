@@ -231,7 +231,7 @@ const VR = (() => {
           o.entrega === 'entrega'
             ? `Entrega: ${f}, ${lugar}. Le confirmaremos la hora de entrega por este medio.`
             : `Recoger: ${f}, de 10:00 a 17:00, en Villa Rústica.`,
-          `Total a pagar al ${o.entrega === 'entrega' ? 'recibir' : 'recoger'}: ${money(t)} (efectivo).`,
+          o.pago ? `Total: ${money(t)} · ya está pagado.` : `Total a pagar al ${o.entrega === 'entrega' ? 'recibir' : 'recoger'}: ${money(t)} (efectivo).`,
           'Gracias por su preferencia.',
         ].join('\n');
       }
@@ -241,7 +241,7 @@ const VR = (() => {
         o.entrega === 'entrega'
           ? `Entrega: ${f}, ${lugar}. Te confirmaremos la hora por este medio.`
           : `Recoger: ${f}, de 10:00 a 17:00, en Villa Rústica.`,
-        `Total a pagar al ${o.entrega === 'entrega' ? 'recibir' : 'recoger'}: ${money(t)}${breadTotals(o).comision ? ' (incluye 10% de envío)' : ''}.`,
+        o.pago ? `Total: ${money(t)} · ya está pagado.` : `Total a pagar al ${o.entrega === 'entrega' ? 'recibir' : 'recoger'}: ${money(t)}${breadTotals(o).comision ? ' (incluye 10% de envío)' : ''}.`,
         '¡Gracias!',
       ].join('\n');
     },

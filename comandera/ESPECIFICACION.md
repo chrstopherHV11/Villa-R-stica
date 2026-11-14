@@ -191,3 +191,10 @@ Las tarjetas verdes se confundían con el fondo. Ahora el fondo sigue verde oliv
   - Si el pedido ya lo cobró la otra tablet, sale "ya estaba pagado en la otra tablet. No cobres de nuevo."
   - Antes de cobrar, la Tablet 2 pregunta al servidor si el mostrador ya cobró. Si ya cobró, solo entrega.
 - El WhatsApp de "listo" dice "Ya está pagado." cuando el pedido se cobró antes.
+
+## 16. Revisión 7 · Cobro de pan en la caja
+
+- El panel de pan de la Tablet 1 ya no se limita a hoy y mañana. Muestra **Por confirmar**, **Por cobrar** (todos los aceptados sin pagar, de cualquier fecha) y **Pagados · esperando entrega**. Así se puede cobrar por adelantado un pedido para dentro de varios días.
+- **Cobrar:** efectivo con cambio, o tarjeta con la pantalla Tap. Solo guarda el pago.
+- **Aceptar y cobrar** en los pedidos nuevos: cobra, acepta y manda la confirmación, que dice "ya está pagado".
+- La Tablet 1 sigue sin poder rechazar, entregar, retirar ni cancelar pedidos de pan.
